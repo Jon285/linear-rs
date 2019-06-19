@@ -29,7 +29,7 @@ impl Vec3 {
     }
 
     #[inline]
-    pub fn make_unit(&mut self) {
+    pub fn normalize(&mut self) {
         let k = 1.0 / self.len();
         self.x *= k;
         self.y *= k;

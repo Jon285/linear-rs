@@ -29,6 +29,66 @@ impl Mat3 {
         }
     }
 
+    /*
+    #[inline]
+    pub fn rotate_x(ang: f32) -> Self {
+        Mat3 {
+            mat: [
+                [1.0, 0.0, 0.0],
+                [0.0, ang.cos(), ang.sin()],
+                [0.0, -ang.sin(), ang.cos()],
+            ],
+        }
+    }
+    */
+
+    #[inline]
+    pub fn rotation(ang: f32, n: Vec3) -> Self {
+        Mat3 {
+            mat: [
+                [
+                    n.x.powi(2) * (1.0 - ang.cos()) + ang.cos(),
+                    n.x * n.y * (1.0 - ang.cos()) + n.z * ang.sin(),
+                    n.x * n.z * (1.0 - ang.cos()) - n.z * ang.sin(),
+                ],
+                [
+                    n.x * n.y * (1.0 - ang.cos()) - n.z * ang.sin(),
+                    n.y.powi(2) * (1.0 - ang.cos()) + ang.cos(),
+                    n.y * n.z * (1.0 - ang.cos()) + n.x * ang.sin(),
+                ],
+                [
+                    n.x * n.z * (1.0 - ang.cos()) + n.y * ang.sin(),
+                    n.y * n.z * (1.0 - ang.cos()) - n.x * ang.sin(),
+                    n.z.powi(2) * (1.0 - ang.cos()) + ang.cos(),
+                ],
+            ],
+        }
+    }
+
+    //Uniform scale in all directions
+    #[inline]
+    pub fn scale(k: f32) -> Self {
+        Mat3 {
+            mat: [[k, 0.0, 0.0], [0.0, k, 0.0], [0.0, 0.0, k]],
+        }
+    }
+
+    //Scale towards an arbitrary direction
+    #[inline]
+    pub fn scale_arb(k: f32, n: Vec3) -> Self {
+        let nx_ny = (k - 1.0) * n.x * n.y;
+        let nx_nz = (k - 1.0) * n.x * n.z;
+        let ny_nz = (k - 1.0) * n.y * n.z;
+
+        Mat3 {
+            mat: [
+                [1.0 + (k - 1.0) * n.x.powi(2), nx_ny, nx_nz],
+                [nx_ny, 1.0 + (k - 1.0) * n.y.powi(2), ny_nz],
+                [nx_nz, ny_nz, 1.0 + (k - 1.0) * n.z.powi(2)],
+            ],
+        }
+    }
+
     #[inline]
     pub fn from_array(arr: &[[f32; 3]; 3]) -> Self {
         Mat3 { mat: *arr }
@@ -66,12 +126,47 @@ impl Mat3 {
 
     #[inline]
     pub fn as_ptr(&self) -> *const f32 {
-        &self.mat[0][0]
+        &self.mat[0][0] as *const f32
+    }
+
+    #[inline]
+    pub fn as_mut_ptr(&mut self) -> *mut f32 {
+        &mut self[0][0] as *mut f32
     }
 
     #[inline]
     pub fn as_c_ptr(&self) -> *const c_void {
         &self.mat[0][0] as *const f32 as *const c_void
+    }
+}
+
+impl Add<Mat3> for Mat3 {
+    type Output = Mat3;
+
+    fn add(self, other: Mat3) -> Self::Output {
+        let mut ret = Mat3::default();
+
+        for i in 0..=2 {
+            for j in 0..=2 {
+                ret[i][j] = self[i][j] + other[i][j]
+            }
+        }
+        ret
+    }
+}
+
+impl Sub<Mat3> for Mat3 {
+    type Output = Self;
+
+    fn sub(self, other: Mat3) -> Self {
+        let mut ret = Mat3::default();
+
+        for i in 0..=2 {
+            for j in 0..=2 {
+                ret[i][j] = self[i][j] - other[i][j];
+            }
+        }
+        ret
     }
 }
 
@@ -128,6 +223,21 @@ impl Mul<Mat3> for Mat3 {
                 ],
             ],
         }
+    }
+}
+
+impl Mul<Mat3> for f32 {
+    type Output = Mat3;
+
+    fn mul(self, rhs: Mat3) -> Self::Output {
+        let mut ret = Mat3::default();
+
+        for i in 0..=2 {
+            for j in 0..=2 {
+                ret[i][j] = self * rhs[i][j];
+            }
+        }
+        ret
     }
 }
 

@@ -6,7 +6,7 @@ use std::ops::*;
 #[repr(C)]
 #[derive(Debug, PartialEq, Copy, Clone)]
 pub struct Mat4 {
-    pub mat: [[f32; 4]; 4],
+    mat: [[f32; 4]; 4],
 }
 
 #[allow(dead_code)]
@@ -61,8 +61,8 @@ impl Mat4 {
     pub fn transpose(&mut self) {
         let mut temp = Mat4::default();
 
-        for i in 0..3 {
-            for j in 0..3 {
+        for i in 0..=3 {
+            for j in 0..=3 {
                 temp[i][j] = self[j][i]
             }
         }
@@ -73,12 +73,22 @@ impl Mat4 {
     pub fn transpost(&self) -> Self {
         let mut ret = Mat4::default();
 
-        for i in 0..3 {
-            for j in 0..3 {
+        for i in 0..=3 {
+            for j in 0..=3 {
                 ret[i][j] = self[j][i];
             }
         }
         ret
+    }
+
+    #[inline]
+    pub fn as_ptr(&self) -> *const f32 {
+        &self[0][0] as *const f32
+    }
+
+    #[inline]
+    pub fn as_mut_ptr(&mut self) -> *mut f32 {
+        &mut self[0][0] as *mut f32
     }
 }
 
@@ -110,12 +120,27 @@ impl Mul<Mat4> for f32 {
     fn mul(self, rhs: Mat4) -> Self::Output {
         let mut ret = Mat4::default();
 
-        for i in 0..3 {
-            for j in 0..3 {
+        for i in 0..=3 {
+            for j in 0..=3 {
                 ret[i][j] = rhs[i][j] * self;
             }
         }
 
+        ret
+    }
+}
+
+impl Add<Mat4> for Mat4 {
+    type Output = Self;
+
+    fn add(self, rhs: Mat4) -> Self {
+        let mut ret = Mat4::default();
+
+        for i in 0..=3 {
+            for j in 0..=3 {
+                ret[i][j] = self[i][j] + rhs[i][j];
+            }
+        }
         ret
     }
 }

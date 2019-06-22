@@ -37,6 +37,16 @@ impl Vec3 {
     }
 
     #[inline]
+    pub fn normalized(&self) -> Self {
+        let k = 1.0 / self.len();
+        Vec3 {
+            x: self.x * k,
+            y: self.y * k,
+            z: self.z * k,
+        }
+    }
+
+    #[inline]
     pub fn dot(&self, rhs: &Vec3) -> f32 {
         self[0] * rhs[0] + self[1] * rhs[1] + self[2] * rhs[2]
     }
@@ -64,22 +74,6 @@ impl Vec3 {
             z: other.z - self.z,
         }
     }
-}
-
-//SPECIAL OPERATIONS
-#[allow(dead_code)]
-pub fn unit_vec(v: Vec3) -> Vec3 {
-    let k = 1.0 / v.len();
-    Vec3 {
-        x: v.x * k,
-        y: v.y * k,
-        z: v.z * k,
-    }
-}
-
-#[allow(dead_code)]
-pub fn reflect(v: &Vec3, u: &Vec3) -> Vec3 {
-    *v - 2.0 * v.dot(u) * *u
 }
 
 //GENERALS TRAITS AND OPERATIONS

@@ -1,20 +1,39 @@
 #![crate_type = "lib"]
+#![allow(unused_imports)]
 
 mod matrix;
 mod vectors;
 
-#[allow(unused_imports)]
+pub use matrix::Mat2;
 pub use matrix::Mat3;
-#[allow(unused_imports)]
 pub use matrix::Mat4;
-#[allow(unused_imports)]
+pub use vectors::Vec2;
 pub use vectors::Vec3;
-#[allow(unused_imports)]
 pub use vectors::Vec4;
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn vec2_sub() {
+        let vec = Vec2::new(1.0, 1.0);
+        let other = Vec2::new(1.0, 1.0);
+        let res = Vec2::new(0.0, 0.0);
+        let sub = vec - other;
+
+        assert_eq!(res.x, sub.x);
+        assert_eq!(res.x, sub.x);
+    }
+
+    #[test]
+    fn vec2_sum() {
+        let vec = Vec2::new(1.0, 1.0);
+        let other = Vec2::new(1.0, 1.0);
+        let res = Vec2::new(2.0, 2.0);
+
+        assert_eq!(res, vec + other);
+    }
 
     #[test]
     fn mat3_default() {

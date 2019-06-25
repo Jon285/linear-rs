@@ -1,7 +1,7 @@
 use std::ops::*;
 
 #[repr(C)]
-#[derive(Debug)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub struct Vec2 {
     pub x: f32,
     pub y: f32,

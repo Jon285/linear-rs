@@ -42,28 +42,4 @@ impl Vec4 {
     }
 }
 
-impl Mul<f32> for Vec4 {
-    type Output = Vec4;
-
-    fn mul(self, rhs: f32) -> Self::Output {
-        Vec4 {
-            x: self.x * rhs,
-            y: self.y * rhs,
-            z: self.z * rhs,
-            w: self.w * rhs,
-        }
-    }
-}
-
-impl Mul<Vec4> for Vec4 {
-    type Output = Vec4;
-
-    fn mul(self, rhs: Vec4) -> Self::Output {
-        Vec4 {
-            x: self.x * rhs.x,
-            y: self.y * rhs.y,
-            z: self.z * rhs.z,
-            w: self.w * rhs.w,
-        }
-    }
-}
+impl_vec_ops!(Vec4, x, y, z, w);

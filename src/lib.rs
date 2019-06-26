@@ -31,8 +31,10 @@ mod tests {
         let vec = Vec2::new(1.0, 1.0);
         let other = Vec2::new(1.0, 1.0);
         let res = Vec2::new(2.0, 2.0);
+        let sum = vec + other;
 
-        assert_eq!(res, vec + other);
+        assert_eq!(res.x, sum.x);
+        assert_eq!(res.y, sum.y);
     }
 
     #[test]
@@ -118,7 +120,7 @@ mod tests {
 
     #[test]
     fn mat4_ident_mul() {
-        let identity = Mat4::default();
+        let _identity = Mat4::default();
         let other = Mat4::new(
             1.0, 3.0, 4.2, 0.3, 0.3, 7.3, 0.2, 5.1, 7.0, 10.2, 1.2, 5.6, 1.0, 3.1, 2.0, 7.0,
         );

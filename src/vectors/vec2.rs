@@ -15,13 +15,4 @@ impl Vec2 {
     }
 }
 
-impl Mul<f32> for Vec2 {
-    type Output = Self;
-
-    fn mul(self, rhs: f32) -> Self {
-        Vec2 {
-            x: self.x * rhs,
-            y: self.y * rhs,
-        }
-    }
-}
+impl_vec_ops!(Vec2, x, y);

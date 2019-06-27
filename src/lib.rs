@@ -38,6 +38,29 @@ mod tests {
     }
 
     #[test]
+    fn mat_ops_sum() {
+        let m2 = Mat2::new(1.0, 1.0, 1.0, 1.0);
+        let other_m2 = m2;
+        let m2_res = Mat2::new(2.0, 2.0, 2.0, 2.0);
+
+        let m3 = Mat3::new(1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0);
+        let other_m3 = m3;
+        let m3_res = Mat3::new(2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0);
+
+        let m4 = Mat4::new(
+            1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+        );
+        let other_m4 = m4;
+        let m4_res = Mat4::new(
+            2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0,
+        );
+
+        assert_eq!(m2_res, m2 + other_m2);
+        assert_eq!(m3_res, m3 + other_m3);
+        assert_eq!(m4_res, m4 + other_m4);
+    }
+
+    #[test]
     fn mat3_default() {
         let testm = Mat3::default();
         let compare = Mat3::new(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0);

@@ -92,55 +92,12 @@ impl Mat4 {
     }
 }
 
+impl_mat_ops!(Mat4, mat, 4, [f32; 4]);
+
 impl Default for Mat4 {
     fn default() -> Self {
         Mat4::new(
             1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0,
         )
-    }
-}
-
-impl Index<usize> for Mat4 {
-    type Output = [f32; 4];
-
-    fn index<'a>(&'a self, index: usize) -> &'a Self::Output {
-        &self.mat[index]
-    }
-}
-
-impl IndexMut<usize> for Mat4 {
-    fn index_mut<'a>(&'a mut self, index: usize) -> &'a mut Self::Output {
-        &mut self.mat[index]
-    }
-}
-
-impl Mul<Mat4> for f32 {
-    type Output = Mat4;
-
-    fn mul(self, rhs: Mat4) -> Self::Output {
-        let mut ret = Mat4::default();
-
-        for i in 0..=3 {
-            for j in 0..=3 {
-                ret[i][j] = rhs[i][j] * self;
-            }
-        }
-
-        ret
-    }
-}
-
-impl Add<Mat4> for Mat4 {
-    type Output = Self;
-
-    fn add(self, rhs: Mat4) -> Self {
-        let mut ret = Mat4::default();
-
-        for i in 0..=3 {
-            for j in 0..=3 {
-                ret[i][j] = self[i][j] + rhs[i][j];
-            }
-        }
-        ret
     }
 }

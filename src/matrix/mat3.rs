@@ -140,35 +140,7 @@ impl Mat3 {
     }
 }
 
-impl Add<Mat3> for Mat3 {
-    type Output = Mat3;
-
-    fn add(self, other: Mat3) -> Self::Output {
-        let mut ret = Mat3::default();
-
-        for i in 0..=2 {
-            for j in 0..=2 {
-                ret[i][j] = self[i][j] + other[i][j]
-            }
-        }
-        ret
-    }
-}
-
-impl Sub<Mat3> for Mat3 {
-    type Output = Self;
-
-    fn sub(self, other: Mat3) -> Self {
-        let mut ret = Mat3::default();
-
-        for i in 0..=2 {
-            for j in 0..=2 {
-                ret[i][j] = self[i][j] - other[i][j];
-            }
-        }
-        ret
-    }
-}
+impl_mat_ops!(Mat3, mat, 3, [f32; 3]);
 
 impl Mul<Vec3> for Mat3 {
     type Output = Vec3;
@@ -179,24 +151,6 @@ impl Mul<Vec3> for Mat3 {
             y: rhs.x * self.mat[0][1] + rhs.y * self.mat[1][1] + rhs.z * self.mat[2][1],
             z: rhs.x * self.mat[0][2] + rhs.y * self.mat[1][2] + rhs.z * self.mat[2][2],
         }
-    }
-}
-
-impl Mul<f32> for Mat3 {
-    type Output = Mat3;
-
-    fn mul(self, rhs: f32) -> Mat3 {
-        Mat3::new(
-            self.mat[0][0] * rhs,
-            self.mat[0][1] * rhs,
-            self.mat[0][2] * rhs,
-            self.mat[1][0] * rhs,
-            self.mat[1][1] * rhs,
-            self.mat[1][2] * rhs,
-            self.mat[2][0] * rhs,
-            self.mat[2][1] * rhs,
-            self.mat[2][2] * rhs,
-        )
     }
 }
 
@@ -222,39 +176,6 @@ impl Mul<Mat3> for Mat3 {
                     self[0][2] * other[2][0] + self[1][2] * other[2][1] + self[2][2] * other[2][2],
                 ],
             ],
-        }
-    }
-}
-
-impl Mul<Mat3> for f32 {
-    type Output = Mat3;
-
-    fn mul(self, rhs: Mat3) -> Self::Output {
-        let mut ret = Mat3::default();
-
-        for i in 0..=2 {
-            for j in 0..=2 {
-                ret[i][j] = self * rhs[i][j];
-            }
-        }
-        ret
-    }
-}
-
-impl Index<usize> for Mat3 {
-    type Output = [f32; 3];
-
-    fn index<'a>(&'a self, index: usize) -> &'a Self::Output {
-        match index {
-            _ => &self.mat[index],
-        }
-    }
-}
-
-impl IndexMut<usize> for Mat3 {
-    fn index_mut<'a>(&'a mut self, index: usize) -> &'a mut [f32; 3] {
-        match index {
-            _ => &mut self.mat[index],
         }
     }
 }

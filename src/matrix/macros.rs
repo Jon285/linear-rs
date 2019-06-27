@@ -81,4 +81,23 @@ macro_rules! impl_mat_ops {
             }
         }
     };
+
+    ($MatN:ident, $VecN:ident, $dimension:expr) => {
+        use std::ops::Mul;
+
+        impl Mul<$VecN> for $MatN {
+            type Output = $VecN;
+
+            fn mul(self, other: $VecN) -> $VecN {
+                let mut ret = $VecN::default();
+
+                for i in 0..$dimension {
+                    for j in 0..$dimension {
+                        ret[j] += other[i] * self[i][j];
+                    }
+                }
+                ret
+            }
+        }
+    };
 }

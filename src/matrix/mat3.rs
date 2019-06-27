@@ -141,18 +141,19 @@ impl Mat3 {
 }
 
 impl_mat_ops!(Mat3, mat, 3, [f32; 3]);
+impl_mat_ops!(Mat3, Vec3, 3);
 
-impl Mul<Vec3> for Mat3 {
-    type Output = Vec3;
-
-    fn mul(self, rhs: Vec3) -> Vec3 {
-        Vec3 {
-            x: rhs.x * self.mat[0][0] + rhs.y * self.mat[1][0] + rhs.z * self.mat[2][0],
-            y: rhs.x * self.mat[0][1] + rhs.y * self.mat[1][1] + rhs.z * self.mat[2][1],
-            z: rhs.x * self.mat[0][2] + rhs.y * self.mat[1][2] + rhs.z * self.mat[2][2],
-        }
-    }
-}
+//impl Mul<Vec3> for Mat3 {
+//type Output = Vec3;
+//
+//fn mul(self, rhs: Vec3) -> Vec3 {
+//Vec3 {
+//x: rhs.x * self.mat[0][0] + rhs.y * self.mat[1][0] + rhs.z * self.mat[2][0],
+//y: rhs.x * self.mat[0][1] + rhs.y * self.mat[1][1] + rhs.z * self.mat[2][1],
+//z: rhs.x * self.mat[0][2] + rhs.y * self.mat[1][2] + rhs.z * self.mat[2][2],
+//}
+//}
+//}
 
 impl Mul<Mat3> for Mat3 {
     type Output = Self;

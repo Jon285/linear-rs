@@ -1,7 +1,7 @@
 use std::ops::*;
 
 #[repr(C)]
-#[derive(Copy, Clone, PartialEq, Debug)]
+#[derive(Default, Copy, Clone, PartialEq, Debug)]
 pub struct Vec2 {
     pub x: f32,
     pub y: f32,
@@ -35,32 +35,4 @@ impl Vec2 {
     }
 }
 
-impl_vec_ops!(Vec2, x, y);
-
-impl Index<usize> for Vec2 {
-    type Output = f32;
-
-    fn index<'a>(&'a self, index: usize) -> &'a Self::Output {
-        match index {
-            0 => &self.x,
-            1 => &self.y,
-            _ => panic!(
-                "PANIC. Out of bonds index access on Vector: {:?}\nWith index: {}\n",
-                self, index
-            ),
-        }
-    }
-}
-
-impl IndexMut<usize> for Vec2 {
-    fn index_mut<'a>(&'a mut self, index: usize) -> &'a mut f32 {
-        match index {
-            0 => &mut self.x,
-            1 => &mut self.y,
-            _ => panic!(
-                "PANIC. Out of bons access on Vector: {:?}\nWith index: {}\n",
-                self, index
-            ),
-        }
-    }
-}
+impl_vec_ops!(Vec2, x, y = 0, 1);

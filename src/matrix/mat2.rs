@@ -75,17 +75,18 @@ impl Mat2 {
 }
 
 impl_mat_ops!(Mat2, mat, 2, [f32; 2]);
+impl_mat_ops!(Mat2, Vec2, 2);
 
-impl Mul<Vec2> for Mat2 {
-    type Output = Vec2;
-
-    fn mul(self, rhs: Vec2) -> Self::Output {
-        Vec2 {
-            x: self[0][0] * rhs.x + self[1][0] * rhs.y,
-            y: self[0][1] * rhs.x + self[1][1] * rhs.y,
-        }
-    }
-}
+//impl Mul<Vec2> for Mat2 {
+//    type Output = Vec2;
+//
+//    fn mul(self, rhs: Vec2) -> Self::Output {
+//        Vec2 {
+//            x: self[0][0] * rhs.x + self[1][0] * rhs.y,
+//            y: self[0][1] * rhs.x + self[1][1] * rhs.y,
+//        }
+//    }
+//}
 
 impl Default for Mat2 {
     fn default() -> Self {

@@ -1,5 +1,5 @@
 macro_rules! impl_vec_ops {
-    ($VecN:ident, $($field:ident),+) => (
+    ($VecN:ident, $($field:ident),+ = $($dimensions:pat),+) => {
             use std::ops::*;
 
             impl Add<$VecN> for $VecN {
@@ -135,5 +135,25 @@ macro_rules! impl_vec_ops {
                     }
                 }
             }
-    )
+
+            impl Index<usize> for $VecN {
+                type Output = f32;
+
+                fn index<'a>(&'a self, index: usize) -> &'a Self::Output {
+                    match index {
+                        $($dimensions => &self.$field,)+
+                        _ => panic!("PANIC. Out of bonds access on Vector: {:?}\nWith index: {}", self, index),
+                    }
+                }
+            }
+
+            impl IndexMut<usize> for $VecN {
+                fn index_mut<'a>(&'a mut self, index: usize) -> &'a mut f32 {
+                    match index {
+                        $($dimensions => &mut self.$field,)+
+                        _ => panic!("PANIC, Out of bonds access on Vector: {:?}\nWith index: {}", self, index),
+                    }
+                }
+            }
+    };
 }

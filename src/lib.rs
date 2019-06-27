@@ -16,6 +16,25 @@ mod tests {
     use super::*;
 
     #[test]
+    fn vec_index() {
+        let vec2 = Vec2::new(1.0, 2.0);
+        let vec3 = Vec3::new(1.0, 2.0, 3.0);
+        let vec4 = Vec4::new(1.0, 2.0, 3.0, 4.0);
+
+        assert_eq!(vec2[0], vec2.x);
+        assert_eq!(vec2[1], vec2.y);
+
+        assert_eq!(vec3[0], vec3.x);
+        assert_eq!(vec3[1], vec3.y);
+        assert_eq!(vec3[2], vec3.z);
+
+        assert_eq!(vec4[0], vec4.x);
+        assert_eq!(vec4[1], vec4.y);
+        assert_eq!(vec4[2], vec4.z);
+        assert_eq!(vec4[3], vec4.w);
+    }
+
+    #[test]
     fn vec2_sub() {
         let vec = Vec2::new(1.0, 1.0);
         let other = Vec2::new(1.0, 1.0);
@@ -35,6 +54,14 @@ mod tests {
 
         assert_eq!(res.x, sum.x);
         assert_eq!(res.y, sum.y);
+    }
+
+    #[test]
+    fn mat_vec_mul() {
+        let mat = Mat3::default();
+        let vec = Vec3::new(3.0, 3.0, 3.0);
+
+        assert_eq!(vec, mat * vec);
     }
 
     #[test]

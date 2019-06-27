@@ -42,4 +42,4 @@ impl Vec4 {
     }
 }
 
-impl_vec_ops!(Vec4, x, y, z, w);
+impl_vec_ops!(Vec4, x, y, z, w = 0, 1, 2, 3);

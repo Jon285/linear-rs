@@ -76,17 +76,4 @@ impl Vec3 {
     }
 }
 
-impl_vec_ops!(Vec3, x, y, z);
-
-impl Index<usize> for Vec3 {
-    type Output = f32;
-
-    fn index<'a>(&'a self, index: usize) -> &'a Self::Output {
-        match index {
-            0 => &self.x,
-            1 => &self.y,
-            2 => &self.z,
-            _ => panic!("Error indexing on {:?}, invalid index {}", self, index),
-        }
-    }
-}
+impl_vec_ops!(Vec3, x, y, z = 0, 1, 2);

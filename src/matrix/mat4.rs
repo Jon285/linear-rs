@@ -93,6 +93,7 @@ impl Mat4 {
 }
 
 impl_mat_ops!(Mat4, mat, 4, [f32; 4]);
+impl_mat_ops!(Mat4, Vec4, 4);
 
 impl Default for Mat4 {
     fn default() -> Self {

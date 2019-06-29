@@ -88,6 +88,14 @@ mod tests {
     }
 
     #[test]
+    fn mat2_ident_mul() {
+        let ident = Mat2::default();
+        let mat = Mat2::new(2.0, 3.4, 5.0, 2.1);
+
+        assert_eq!(mat, mat * ident);
+    }
+
+    #[test]
     fn mat3_default() {
         let testm = Mat3::default();
         let compare = Mat3::new(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0);
@@ -170,12 +178,12 @@ mod tests {
 
     #[test]
     fn mat4_ident_mul() {
-        let _identity = Mat4::default();
+        let identity = Mat4::default();
         let other = Mat4::new(
             1.0, 3.0, 4.2, 0.3, 0.3, 7.3, 0.2, 5.1, 7.0, 10.2, 1.2, 5.6, 1.0, 3.1, 2.0, 7.0,
         );
 
-        assert_eq!(other, other);
+        assert_eq!(other, other * identity);
     }
 
     #[test]

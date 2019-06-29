@@ -1,4 +1,6 @@
+//implementation of all basic ops to the matrix structs
 macro_rules! impl_mat_ops {
+    //basic ops
     ($MatN:ident, $field:ident, $dimension:expr, $indextype:ty) => {
         use std::ops::*;
 
@@ -67,6 +69,23 @@ macro_rules! impl_mat_ops {
             }
         }
 
+        impl Mul<$MatN> for $MatN {
+            type Output = Self;
+
+            fn mul(self, rhs: $MatN) -> Self {
+                let mut ret = $MatN::zero();
+
+                for i in 0..$dimension {
+                    for j in 0..$dimension {
+                        for k in 0..$dimension {
+                            ret[i][j] += self[k][j] * rhs[i][k];
+                        }
+                    }
+                }
+                ret
+            }
+        }
+
         impl Index<usize> for $MatN {
             type Output = $indextype;
 
@@ -82,6 +101,7 @@ macro_rules! impl_mat_ops {
         }
     };
 
+    //Matrix x Vector multiplication
     ($MatN:ident, $VecN:ident, $dimension:expr) => {
         use std::ops::Mul;
 

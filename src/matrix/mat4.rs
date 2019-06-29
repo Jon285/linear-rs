@@ -41,6 +41,18 @@ impl Mat4 {
     }
 
     #[inline]
+    pub fn zero() -> Self {
+        Mat4 {
+            mat: [
+                [0.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 0.0],
+            ],
+        }
+    }
+
+    #[inline]
     pub fn from_array(arr: &[[f32; 4]; 4]) -> Self {
         Mat4 { mat: *arr }
     }

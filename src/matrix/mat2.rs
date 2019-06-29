@@ -19,6 +19,102 @@ impl Mat2 {
     }
 
     #[inline]
+    pub fn zero() -> Self {
+        Mat2 {
+            mat: [[0.0, 0.0], [0.0, 0.0]],
+        }
+    }
+
+    //====================================== TRANSFORMATION MATRICES ===============================
+
+    ///Returns a rotation Matrix around the origin
+    #[inline]
+    pub fn rotation(ang: f32) -> Self {
+        Mat2 {
+            mat: [[ang.cos(), -ang.sin()], [ang.sin(), ang.cos()]],
+        }
+    }
+
+    ///Uniform scale Matrix in all directions by a factor `k`
+    #[inline]
+    pub fn scale(k: f32) -> Self {
+        Mat2 {
+            mat: [[k, 0.0], [0.0, k]],
+        }
+    }
+
+    ///Arbitrary scale Matrix towards `n` by a factor of `k`
+    #[inline]
+    pub fn scale_arb(k: f32, n: &Vec2) -> Self {
+        let n = n.normalized();
+
+        Mat2 {
+            mat: [
+                [1.0 + (k - 1.0) * n.x.powi(2), (k - 1.0) * n.x * n.y],
+                [(k - 1.0) * n.x * n.y, 1.0 + (k - 1.0) * n.y.powi(2)],
+            ],
+        }
+    }
+
+    ///Projection Matrix in the x-axis
+    #[inline]
+    pub fn projection_x() -> Self {
+        Mat2 {
+            mat: [[1.0, 0.0], [0.0, 0.0]],
+        }
+    }
+
+    ///Projection Matrix in the y-axis
+    #[inline]
+    pub fn projection_y() -> Self {
+        Mat2 {
+            mat: [[0.0, 0.0], [0.0, 1.0]],
+        }
+    }
+
+    ///Create a projection Matrix in the arbitrary `n` axis
+    #[inline]
+    pub fn projection(n: &Vec2) -> Self {
+        let n = n.normalized();
+
+        Mat2 {
+            mat: [
+                [1.0 - n.x.powi(2), -n.x * n.y],
+                [-n.x * n.y, 1.0 - n.y.powi(2)],
+            ],
+        }
+    }
+
+    ///Reflection Matrix about the `n` axis
+    #[inline]
+    pub fn reflection(n: &Vec2) -> Self {
+        let n = n.normalized();
+
+        Mat2 {
+            mat: [
+                [1.0 - 2.0 * n.x.powi(2), -2.0 * n.x * n.y],
+                [-2.0 * n.x * n.y, 1.0 - 2.0 * n.y.powi(2)],
+            ],
+        }
+    }
+
+    #[inline]
+    pub fn shearing_x(s: f32) -> Self {
+        Mat2 {
+            mat: [[1.0, 0.0], [s, 1.0]],
+        }
+    }
+
+    #[inline]
+    pub fn shearing_y(s: f32) -> Self {
+        Mat2 {
+            mat: [[1.0, s], [0.0, 0.0]],
+        }
+    }
+
+    //====================================================================================
+
+    #[inline]
     pub fn from_array(arr: &[[f32; 2]; 2]) -> Self {
         Mat2 { mat: *arr }
     }
@@ -27,20 +123,6 @@ impl Mat2 {
     pub fn from_vec(vec: &Vec2) -> Self {
         Mat2 {
             mat: [[vec.x, vec.y], [vec.x, vec.y]],
-        }
-    }
-
-    #[inline]
-    pub fn rotation(ang: f32) -> Self {
-        Mat2 {
-            mat: [[ang.cos(), -ang.sin()], [ang.sin(), ang.cos()]],
-        }
-    }
-
-    #[inline]
-    pub fn scale(k: f32) -> Self {
-        Mat2 {
-            mat: [[k, 0.0], [0.0, k]],
         }
     }
 
@@ -76,17 +158,6 @@ impl Mat2 {
 
 impl_mat_ops!(Mat2, mat, 2, [f32; 2]);
 impl_mat_ops!(Mat2, Vec2, 2);
-
-//impl Mul<Vec2> for Mat2 {
-//    type Output = Vec2;
-//
-//    fn mul(self, rhs: Vec2) -> Self::Output {
-//        Vec2 {
-//            x: self[0][0] * rhs.x + self[1][0] * rhs.y,
-//            y: self[0][1] * rhs.x + self[1][1] * rhs.y,
-//        }
-//    }
-//}
 
 impl Default for Mat2 {
     fn default() -> Self {

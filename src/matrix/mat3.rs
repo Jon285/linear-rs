@@ -2,7 +2,6 @@ use crate::vectors::Vec3;
 
 use std::default::Default;
 use std::ffi::c_void;
-use std::ops::*;
 
 #[repr(C)]
 #[derive(Copy, Clone, Debug, PartialEq)]
@@ -29,9 +28,18 @@ impl Mat3 {
         }
     }
 
-    /*
+    ///Returns a null matrix
+    pub fn zero() -> Self {
+        Mat3 {
+            mat: [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]],
+        }
+    }
+
+    //================================== TRANSFORMATION MATRICES =========================================
+
+    ///Returns a rotation Matrix around the x-axis
     #[inline]
-    pub fn rotate_x(ang: f32) -> Self {
+    pub fn rotation_x(ang: f32) -> Self {
         Mat3 {
             mat: [
                 [1.0, 0.0, 0.0],
@@ -40,10 +48,74 @@ impl Mat3 {
             ],
         }
     }
-    */
 
+    ///Returns a rotation Matrix around the y-axis
     #[inline]
-    pub fn rotation(ang: f32, n: Vec3) -> Self {
+    pub fn rotation_y(ang: f32) -> Self {
+        Mat3 {
+            mat: [
+                [ang.cos(), 0.0, -ang.sin()],
+                [0.0, 1.0, 0.0],
+                [ang.sin(), 0.0, ang.cos()],
+            ],
+        }
+    }
+
+    ///Returns a rotation Matrix around the z-axis
+    #[inline]
+    pub fn rotation_z(ang: f32) -> Self {
+        Mat3 {
+            mat: [
+                [ang.cos(), ang.sin(), 0.0],
+                [-ang.sin(), ang.cos(), 0.0],
+                [0.0, 0.0, 1.0],
+            ],
+        }
+    }
+
+    ///Returns a projection Matrix in the x- and y-axis
+    #[inline]
+    pub fn projection_xy() -> Self {
+        Mat3 {
+            mat: [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 0.0]],
+        }
+    }
+
+    ///Returns a projection Matrix in the x- and z-axis
+    #[inline]
+    pub fn projection_xz() -> Self {
+        Mat3 {
+            mat: [[1.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 1.0]],
+        }
+    }
+
+    ///Returns a projection Matrix in the y- and z-axis
+    #[inline]
+    pub fn projection_yz() -> Self {
+        Mat3 {
+            mat: [[0.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]],
+        }
+    }
+
+    ///Creates a projection Matrix in the plane perpendicular to the Vector `n`
+    #[inline]
+    pub fn projection(n: &Vec3) -> Self {
+        let n = n.normalized();
+
+        Mat3 {
+            mat: [
+                [1.0 - n.x.powi(2), -n.x * n.y, -n.x * n.z],
+                [-n.x * n.y, 1.0 - n.y.powi(2), -n.y * n.z],
+                [-n.x * n.z, -n.y * n.z, 1.0 - n.z.powi(2)],
+            ],
+        }
+    }
+
+    ///Creates a rotation Matrix around de axis of `n` by `ang` radians
+    #[inline]
+    pub fn rotation(ang: f32, n: &Vec3) -> Self {
+        let n = n.normalized();
+
         Mat3 {
             mat: [
                 [
@@ -65,7 +137,7 @@ impl Mat3 {
         }
     }
 
-    //Uniform scale in all directions
+    ///Returns a matrix to uniformly scale a 3D vector in all directions by a factor `k`
     #[inline]
     pub fn scale(k: f32) -> Self {
         Mat3 {
@@ -73,21 +145,40 @@ impl Mat3 {
         }
     }
 
-    //Scale towards an arbitrary direction
+    ///Creates a scale Matrix towards the arbitrary direction of `n` by a factor of `k`
     #[inline]
-    pub fn scale_arb(k: f32, n: Vec3) -> Self {
+    pub fn scale_arb(k: f32, n: &Vec3) -> Self {
+        let n = n.normalized();
+
+        //pre calculating some of the members
+        let scale = 1.0 + (k - 1.0);
         let nx_ny = (k - 1.0) * n.x * n.y;
         let nx_nz = (k - 1.0) * n.x * n.z;
         let ny_nz = (k - 1.0) * n.y * n.z;
 
         Mat3 {
             mat: [
-                [1.0 + (k - 1.0) * n.x.powi(2), nx_ny, nx_nz],
-                [nx_ny, 1.0 + (k - 1.0) * n.y.powi(2), ny_nz],
-                [nx_nz, ny_nz, 1.0 + (k - 1.0) * n.z.powi(2)],
+                [scale * n.x.powi(2), nx_ny, nx_nz],
+                [nx_ny, scale * n.y.powi(2), ny_nz],
+                [nx_nz, ny_nz, scale * n.z.powi(2)],
             ],
         }
     }
+
+    #[inline]
+    pub fn reflection(n: &Vec3) -> Self {
+        let n = n.normalized();
+
+        Mat3 {
+            mat: [
+                [1.0 - 2.0 * n.x.powi(2), -2.0 * n.x * n.y, -2.0 * n.x * n.z],
+                [-2.0 * n.x * n.y, 1.0 - 2.0 * n.y.powi(2), -2.0 * n.x * n.z],
+                [-2.0 * n.x * n.z, -2.0 * n.y * n.z, 1.0 - 2.0 * n.z.powi(2)],
+            ],
+        }
+    }
+
+    //=============================================================================================================
 
     #[inline]
     pub fn from_array(arr: &[[f32; 3]; 3]) -> Self {
@@ -142,44 +233,6 @@ impl Mat3 {
 
 impl_mat_ops!(Mat3, mat, 3, [f32; 3]);
 impl_mat_ops!(Mat3, Vec3, 3);
-
-//impl Mul<Vec3> for Mat3 {
-//type Output = Vec3;
-//
-//fn mul(self, rhs: Vec3) -> Vec3 {
-//Vec3 {
-//x: rhs.x * self.mat[0][0] + rhs.y * self.mat[1][0] + rhs.z * self.mat[2][0],
-//y: rhs.x * self.mat[0][1] + rhs.y * self.mat[1][1] + rhs.z * self.mat[2][1],
-//z: rhs.x * self.mat[0][2] + rhs.y * self.mat[1][2] + rhs.z * self.mat[2][2],
-//}
-//}
-//}
-
-impl Mul<Mat3> for Mat3 {
-    type Output = Self;
-
-    fn mul(self, other: Mat3) -> Self {
-        Mat3 {
-            mat: [
-                [
-                    self[0][0] * other[0][0] + self[1][0] * other[0][1] + self[2][0] * other[0][2],
-                    self[0][1] * other[0][0] + self[1][1] * other[0][1] + self[2][1] * other[0][2],
-                    self[0][2] * other[0][0] + self[1][2] * other[0][1] + self[2][2] * other[0][2],
-                ],
-                [
-                    self[0][0] * other[1][0] + self[1][0] * other[1][1] + self[2][0] * other[1][2],
-                    self[0][1] * other[1][0] + self[1][1] * other[1][1] + self[2][1] * other[1][2],
-                    self[0][2] * other[1][0] + self[1][2] * other[1][1] + self[2][2] * other[1][2],
-                ],
-                [
-                    self[0][0] * other[2][0] + self[1][0] * other[2][1] + self[2][0] * other[2][2],
-                    self[0][1] * other[2][0] + self[1][1] * other[2][1] + self[2][1] * other[2][2],
-                    self[0][2] * other[2][0] + self[1][2] * other[2][1] + self[2][2] * other[2][2],
-                ],
-            ],
-        }
-    }
-}
 
 impl Default for Mat3 {
     fn default() -> Self {

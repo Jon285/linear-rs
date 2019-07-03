@@ -151,7 +151,7 @@ macro_rules! impl_vec_ops {
                 fn index_mut<'a>(&'a mut self, index: usize) -> &'a mut f32 {
                     match index {
                         $($dimensions => &mut self.$field,)+
-                        _ => panic!("PANIC, Out of bonds access on Vector: {:?}\nWith index: {}", self, index),
+                        _ => panic!("PANIC. Out of bonds access on Vector: {:?}\nWith index: {}", self, index),
                     }
                 }
             }

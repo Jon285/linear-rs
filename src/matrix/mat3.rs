@@ -1,7 +1,7 @@
+use crate::matrix::Mat2;
 use crate::vectors::Vec3;
 
 use std::default::Default;
-use std::ffi::c_void;
 
 #[repr(C)]
 #[derive(Copy, Clone, Debug, PartialEq)]
@@ -54,9 +54,9 @@ impl Mat3 {
     pub fn rotation_y(ang: f32) -> Self {
         Mat3 {
             mat: [
-                [ang.cos(), 0.0, -ang.sin()],
+                [ang.cos(), 0.0, ang.sin()],
                 [0.0, 1.0, 0.0],
-                [ang.sin(), 0.0, ang.cos()],
+                [-ang.sin(), 0.0, ang.cos()],
             ],
         }
     }
@@ -178,6 +178,27 @@ impl Mat3 {
         }
     }
 
+    #[inline]
+    pub fn shearing_xy(s: f32, t: f32) -> Self {
+        Mat3 {
+            mat: [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [s, t, 1.0]],
+        }
+    }
+
+    #[inline]
+    pub fn shearing_xz(s: f32, t: f32) -> Self {
+        Mat3 {
+            mat: [[1.0, 0.0, 0.0], [s, 1.0, t], [0.0, 0.0, 1.0]],
+        }
+    }
+
+    #[inline]
+    pub fn shearing_yz(s: f32, t: f32) -> Self {
+        Mat3 {
+            mat: [[1.0, s, t], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]],
+        }
+    }
+
     //=============================================================================================================
 
     #[inline]
@@ -215,6 +236,43 @@ impl Mat3 {
         }
     }
 
+    pub fn minor(&self, i: usize, j: usize) -> f32 {
+        let mut matrix_2 = Mat2::default();
+
+        if i > 2 || j > 2 {
+            panic!();
+        }
+
+        for a in 0..3 {
+            for b in 0..3 {
+                if a != i && b != j {
+                    match (a, b) {
+                        (2, 2) => matrix_2[1][1] = self[a][b],
+                        (2, _) => matrix_2[1][b] = self[a][b],
+                        (_, 2) => matrix_2[a][1] = self[a][b],
+                        (_, _) => matrix_2[a][b] = self[a][b],
+                    }
+                }
+            }
+        }
+        matrix_2.determinant()
+    }
+
+    pub fn cofactor(&self, i: usize, j: usize) -> f32 {
+        (-1 as i32).pow((i + j) as u32) as f32 * self.minor(i, j)
+    }
+
+    #[inline]
+    pub fn determinant(&self) -> f32 {
+        let mut ret: f32 = 0.0;
+
+        //hardcoded row value since the result is the same in any other row
+        for i in 0..3 {
+            ret += self[i][0] * self.cofactor(i, 0);
+        }
+        ret
+    }
+
     #[inline]
     pub fn as_ptr(&self) -> *const f32 {
         &self.mat[0][0] as *const f32
@@ -223,11 +281,6 @@ impl Mat3 {
     #[inline]
     pub fn as_mut_ptr(&mut self) -> *mut f32 {
         &mut self[0][0] as *mut f32
-    }
-
-    #[inline]
-    pub fn as_c_ptr(&self) -> *const c_void {
-        &self.mat[0][0] as *const f32 as *const c_void
     }
 }
 

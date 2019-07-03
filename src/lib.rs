@@ -11,6 +11,23 @@ pub use vectors::Vec2;
 pub use vectors::Vec3;
 pub use vectors::Vec4;
 
+//Still thinking if an inline or macro would suit better
+#[macro_export]
+macro_rules! radians {
+    () => {};
+
+    ($ang:expr) => {
+        use std::f32::consts::PI;
+        $ang * (PI as $ang / 180.0)
+    };
+}
+
+#[inline]
+pub fn radians(ang: f32) -> f32 {
+    use std::f32::consts::PI;
+    ang * (PI / 180.0)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

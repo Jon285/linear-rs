@@ -1,7 +1,6 @@
 use crate::vectors::Vec2;
 
 use std::default::Default;
-use std::ffi::c_void;
 
 #[repr(C)]
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -141,6 +140,11 @@ impl Mat2 {
     }
 
     #[inline]
+    pub fn determinant(&self) -> f32 {
+        self[0][0] * self[1][1] - self[1][0] * self[0][1]
+    }
+
+    #[inline]
     pub fn as_ptr(&self) -> *const f32 {
         &self[0][0] as *const f32
     }
@@ -148,11 +152,6 @@ impl Mat2 {
     #[inline]
     pub fn as_mut_ptr(&mut self) -> *mut f32 {
         &mut self[0][0] as *mut f32
-    }
-
-    #[inline]
-    pub fn as_c_void(&self) -> *const c_void {
-        &self[0][0] as *const f32 as *const c_void
     }
 }
 

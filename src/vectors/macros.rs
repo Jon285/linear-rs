@@ -139,7 +139,7 @@ macro_rules! impl_vec_ops {
             impl Index<usize> for $VecN {
                 type Output = f32;
 
-                fn index<'a>(&'a self, index: usize) -> &'a Self::Output {
+                fn index(&self, index: usize) -> &Self::Output {
                     match index {
                         $($dimensions => &self.$field,)+
                         _ => panic!("PANIC. Out of bonds access on Vector: {:?}\nWith index: {}", self, index),
@@ -148,7 +148,7 @@ macro_rules! impl_vec_ops {
             }
 
             impl IndexMut<usize> for $VecN {
-                fn index_mut<'a>(&'a mut self, index: usize) -> &'a mut f32 {
+                fn index_mut(&mut self, index: usize) -> &mut f32 {
                     match index {
                         $($dimensions => &mut self.$field,)+
                         _ => panic!("PANIC. Out of bonds access on Vector: {:?}\nWith index: {}", self, index),

@@ -99,7 +99,7 @@ impl Mat3 {
 
     ///Creates a projection Matrix in the plane perpendicular to the Vector `n`
     #[inline]
-    pub fn projection(n: &Vec3) -> Self {
+    pub fn ortho_projection(n: Vec3) -> Self {
         let n = n.normalized();
 
         Mat3 {
@@ -113,25 +113,29 @@ impl Mat3 {
 
     ///Creates a rotation Matrix around de axis of `n` by `ang` radians
     #[inline]
-    pub fn rotation(ang: f32, n: &Vec3) -> Self {
+    pub fn rotation(ang: f32, n: Vec3) -> Self {
         let n = n.normalized();
+
+        let factor = 1.0 - ang.cos();
+        let sin = ang.sin();
+        let cos = ang.cos();
 
         Mat3 {
             mat: [
                 [
-                    n.x.powi(2) * (1.0 - ang.cos()) + ang.cos(),
-                    n.x * n.y * (1.0 - ang.cos()) + n.z * ang.sin(),
-                    n.x * n.z * (1.0 - ang.cos()) - n.z * ang.sin(),
+                    n.x.powi(2) * factor + cos,
+                    n.x * n.y * factor + n.z * sin,
+                    n.x * n.z * factor - n.z * sin,
                 ],
                 [
-                    n.x * n.y * (1.0 - ang.cos()) - n.z * ang.sin(),
-                    n.y.powi(2) * (1.0 - ang.cos()) + ang.cos(),
-                    n.y * n.z * (1.0 - ang.cos()) + n.x * ang.sin(),
+                    n.x * n.y * factor - n.z * sin,
+                    n.y.powi(2) * factor + cos,
+                    n.y * n.z * factor + n.x * sin,
                 ],
                 [
-                    n.x * n.z * (1.0 - ang.cos()) + n.y * ang.sin(),
-                    n.y * n.z * (1.0 - ang.cos()) - n.x * ang.sin(),
-                    n.z.powi(2) * (1.0 - ang.cos()) + ang.cos(),
+                    n.x * n.z * factor + n.y * sin,
+                    n.y * n.z * factor - n.x * sin,
+                    n.z.powi(2) * factor + cos,
                 ],
             ],
         }
@@ -147,7 +151,7 @@ impl Mat3 {
 
     ///Creates a scale Matrix towards the arbitrary direction of `n` by a factor of `k`
     #[inline]
-    pub fn scale_arb(k: f32, n: &Vec3) -> Self {
+    pub fn scale_arb(k: f32, n: Vec3) -> Self {
         let n = n.normalized();
 
         //pre calculating some of the members
@@ -166,7 +170,7 @@ impl Mat3 {
     }
 
     #[inline]
-    pub fn reflection(n: &Vec3) -> Self {
+    pub fn reflection(n: Vec3) -> Self {
         let n = n.normalized();
 
         Mat3 {
@@ -202,11 +206,6 @@ impl Mat3 {
     //=============================================================================================================
 
     #[inline]
-    pub fn from_array(arr: &[[f32; 3]; 3]) -> Self {
-        Mat3 { mat: *arr }
-    }
-
-    #[inline]
     pub fn from_vec(f: Vec3, s: Vec3, t: Vec3) -> Self {
         Mat3 {
             mat: [[f.x, f.y, f.z], [s.x, s.y, s.z], [t.x, t.y, t.z]],
@@ -237,20 +236,36 @@ impl Mat3 {
     }
 
     pub fn minor(&self, i: usize, j: usize) -> f32 {
-        let mut matrix_2 = Mat2::default();
-
         if i > 2 || j > 2 {
-            panic!();
+            panic!("out of bonds matrix access");
         }
+
+        let mut matrix_2 = Mat2::default();
+        let mut count = 1;
 
         for a in 0..3 {
             for b in 0..3 {
+                //are we in the excluded row or column?
                 if a != i && b != j {
-                    match (a, b) {
-                        (2, 2) => matrix_2[1][1] = self[a][b],
-                        (2, _) => matrix_2[1][b] = self[a][b],
-                        (_, 2) => matrix_2[a][1] = self[a][b],
-                        (_, _) => matrix_2[a][b] = self[a][b],
+                    //which element of the sub array are we inserting now?
+                    match count {
+                        1 => {
+                            matrix_2[0][0] = self[a][b];
+                            count += 1;
+                        }
+                        2 => {
+                            matrix_2[0][1] = self[a][b];
+                            count += 1;
+                        }
+                        3 => {
+                            matrix_2[1][0] = self[a][b];
+                            count += 1;
+                        }
+                        4 => {
+                            matrix_2[1][1] = self[a][b];
+                            count += 1;
+                        }
+                        _ => {}
                     }
                 }
             }
@@ -259,7 +274,9 @@ impl Mat3 {
     }
 
     pub fn cofactor(&self, i: usize, j: usize) -> f32 {
-        (-1 as i32).pow((i + j) as u32) as f32 * self.minor(i, j)
+        let sign = if (i + j) % 2 == 0 { 1.0 } else { -1.0 };
+
+        sign * self.minor(i, j)
     }
 
     #[inline]
@@ -268,9 +285,28 @@ impl Mat3 {
 
         //hardcoded row value since the result is the same in any other row
         for i in 0..3 {
-            ret += self[i][0] * self.cofactor(i, 0);
+            ret += self[0][i] * self.cofactor(0, i);
         }
         ret
+    }
+
+    pub fn inverse(&self) -> Option<Mat3> {
+        let determinant = self.determinant();
+
+        if determinant == 0.0 {
+            return None;
+        }
+
+        let div = 1.0 / determinant;
+        let mut adj = Mat3::default();
+
+        for i in 0..3 {
+            for j in 0..3 {
+                let temp = self.cofactor(i, j);
+                adj[j][i] = temp;
+            }
+        }
+        Some(adj * div)
     }
 
     #[inline]

@@ -129,14 +129,14 @@ mod tests {
         assert_eq!(original, transpost);
     }
 
-    #[test]
-    fn mat3_array() {
-        let arr: [[f32; 3]; 3] = [[1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0]];
-        let mat = Mat3::from_array(&arr);
-        let mat_comp = Mat3::new(1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0);
-
-        assert_eq!(mat, mat_comp);
-    }
+    //#[test]
+    //fn mat3_array() {
+    //let arr: [[f32; 3]; 3] = [[1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0]];
+    //let mat = Mat3::from_array(&arr);
+    //let mat_comp = Mat3::new(1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0);
+    //
+    //assert_eq!(mat, mat_comp);
+    //}
 
     #[test]
     fn mat3_index() {
@@ -219,20 +219,41 @@ mod tests {
         assert_eq!(mat, mat.transpost());
     }
 
+    //#[test]
+    //fn mat4_array() {
+    //let arr: [[f32; 4]; 4] = [
+    //[1.0, 1.0, 1.0, 1.0],
+    //[1.0, 1.0, 1.0, 1.0],
+    //[1.0, 1.0, 1.0, 1.0],
+    //[1.0, 1.0, 1.0, 1.0],
+    //];
+    //
+    //let mat = Mat4::from_array(&arr);
+    //let mat_cmp = Mat4::new(
+    //1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+    //);
+    //
+    //assert_eq!(mat, mat_cmp);
+    //}
+
+    //#[test]
+    //fn ident_inverse() {
+    //let mat = Mat3::default();
+    //
+    //assert_eq!(mat, mat.inverse().unwrap());
+    //}
+
     #[test]
-    fn mat4_array() {
-        let arr: [[f32; 4]; 4] = [
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
-        ];
+    fn mat3_minor() {
+        let mat = Mat3::new(1.0, 3.0, -1.0, 4.0, 0.0, 9.0, 7.0, 5.0, 11.0);
 
-        let mat = Mat4::from_array(&arr);
-        let mat_cmp = Mat4::new(
-            1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
-        );
+        assert_eq!(13.0, mat.minor(2, 1));
+    }
 
-        assert_eq!(mat, mat_cmp);
+    #[test]
+    fn mat3_cof() {
+        let mat = Mat3::new(-4.0, -3.0, 3.0, 0.0, 2.0, -2.0, 1.0, 4.0, -1.0);
+
+        assert_eq!(6.0, mat.cofactor(0, 0));
     }
 }

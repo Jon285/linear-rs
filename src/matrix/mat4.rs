@@ -1,7 +1,8 @@
+use crate::matrix::Mat3;
+use crate::vectors::Vec3;
 use crate::vectors::Vec4;
 
 use std::default::Default;
-use std::ops::*;
 
 #[repr(C)]
 #[derive(Debug, PartialEq, Copy, Clone)]
@@ -53,12 +54,7 @@ impl Mat4 {
     }
 
     #[inline]
-    pub fn from_array(arr: &[[f32; 4]; 4]) -> Self {
-        Mat4 { mat: *arr }
-    }
-
-    #[inline]
-    pub fn from_vec(f: &Vec4, s: &Vec4, t: &Vec4, l: &Vec4) -> Self {
+    pub fn from_vec(f: Vec4, s: Vec4, t: Vec4, l: Vec4) -> Self {
         Mat4 {
             mat: [
                 [f.x, f.y, f.z, f.w],
@@ -69,13 +65,181 @@ impl Mat4 {
         }
     }
 
+    //==========================================TRANSFORMATIONS=====================================
+
+    #[inline]
+    pub fn rotation_x(ang: f32) -> Self {
+        let cos = ang.cos();
+        let sin = ang.sin();
+
+        Mat4 {
+            mat: [
+                [1.0, 0.0, 0.0, 0.0],
+                [0.0, cos, sin, 0.0],
+                [0.0, -sin, cos, 0.0],
+                [0.0, 0.0, 0.0, 1.0],
+            ],
+        }
+    }
+
+    #[inline]
+    pub fn rotation_y(ang: f32) -> Self {
+        let cos = ang.cos();
+        let sin = ang.sin();
+
+        Mat4 {
+            mat: [
+                [cos, 0.0, sin, 0.0],
+                [0.0, 1.0, 0.0, 0.0],
+                [-sin, 0.0, cos, 0.0],
+                [0.0, 0.0, 0.0, 1.0],
+            ],
+        }
+    }
+
+    #[inline]
+    pub fn rotation_z(ang: f32) -> Self {
+        let cos = ang.cos();
+        let sin = ang.sin();
+
+        Mat4 {
+            mat: [
+                [cos, sin, 0.0, 0.0],
+                [-sin, cos, 0.0, 0.0],
+                [0.0, 0.0, 1.0, 0.0],
+                [0.0, 0.0, 0.0, 1.0],
+            ],
+        }
+    }
+
+    #[inline]
+    pub fn rotation(ang: f32, n: Vec3) -> Self {
+        let mat3 = Mat3::rotation(ang, n);
+        let mut ret = Mat4::default();
+
+        for i in 0..3 {
+            ret[i][..3].clone_from_slice(&mat3[i][..3]);
+        }
+        ret
+    }
+
+    #[inline]
+    pub fn translation(n: Vec3) -> Self {
+        Mat4 {
+            mat: [
+                [1.0, 0.0, 0.0, 0.0],
+                [0.0, 1.0, 0.0, 0.0],
+                [0.0, 0.0, 1.0, 0.0],
+                [n.x, n.y, n.z, 1.0],
+            ],
+        }
+    }
+
+    #[inline]
+    pub fn scale(k: f32) -> Self {
+        Mat4 {
+            mat: [
+                [k, 0.0, 0.0, 0.0],
+                [0.0, k, 0.0, 0.0],
+                [0.0, 0.0, k, 0.0],
+                [0.0, 0.0, 0.0, 1.0],
+            ],
+        }
+    }
+    ///Creates a scale Matrix towards the arbitrary direction of `n` by a factor of `k`
+    #[inline]
+    pub fn scale_arb(k: f32, n: Vec3) -> Self {
+        let n = n.normalized();
+
+        //pre calculating some of the members
+        let scale = 1.0 + (k - 1.0);
+        let nx_ny = (k - 1.0) * n.x * n.y;
+        let nx_nz = (k - 1.0) * n.x * n.z;
+        let ny_nz = (k - 1.0) * n.y * n.z;
+
+        Mat4 {
+            mat: [
+                [scale * n.x.powi(2), nx_ny, nx_nz, 0.0],
+                [nx_ny, scale * n.y.powi(2), ny_nz, 0.0],
+                [nx_nz, ny_nz, scale * n.z.powi(2), 0.0],
+                [0.0, 0.0, 0.0, 1.0],
+            ],
+        }
+    }
+
+    #[inline]
+    pub fn reflection(n: Vec3) -> Self {
+        let n = n.normalized();
+
+        Mat4 {
+            mat: [
+                [
+                    1.0 - 2.0 * n.x.powi(2),
+                    -2.0 * n.x * n.y,
+                    -2.0 * n.x * n.z,
+                    0.0,
+                ],
+                [
+                    -2.0 * n.x * n.y,
+                    1.0 - 2.0 * n.y.powi(2),
+                    -2.0 * n.x * n.z,
+                    0.0,
+                ],
+                [
+                    -2.0 * n.x * n.z,
+                    -2.0 * n.y * n.z,
+                    1.0 - 2.0 * n.z.powi(2),
+                    0.0,
+                ],
+                [0.0, 0.0, 0.0, 1.0],
+            ],
+        }
+    }
+
+    #[inline]
+    pub fn shearing_xy(s: f32, t: f32) -> Self {
+        Mat4 {
+            mat: [
+                [1.0, 0.0, 0.0, 0.0],
+                [0.0, 1.0, 0.0, 0.0],
+                [s, t, 1.0, 0.0],
+                [0.0, 0.0, 0.0, 1.0],
+            ],
+        }
+    }
+
+    #[inline]
+    pub fn shearing_xz(s: f32, t: f32) -> Self {
+        Mat4 {
+            mat: [
+                [1.0, 0.0, 0.0, 0.0],
+                [s, 1.0, t, 0.0],
+                [0.0, 0.0, 1.0, 0.0],
+                [0.0, 0.0, 0.0, 1.0],
+            ],
+        }
+    }
+
+    #[inline]
+    pub fn shearing_yz(s: f32, t: f32) -> Self {
+        Mat4 {
+            mat: [
+                [1.0, s, t, 0.0],
+                [0.0, 1.0, 0.0, 0.0],
+                [0.0, 0.0, 1.0, 0.0],
+                [0.0, 0.0, 0.0, 1.0],
+            ],
+        }
+    }
+    //================================================================================================
+
     #[inline]
     pub fn transpose(&mut self) {
         let mut temp = Mat4::default();
 
         for i in 0..=3 {
             for j in 0..=3 {
-                temp[i][j] = self[j][i]
+                temp[i][j] = self[j][i];
             }
         }
         *self = temp;
@@ -91,6 +255,117 @@ impl Mat4 {
             }
         }
         ret
+    }
+
+    //early implementation, not the best design, need refactoring
+    pub fn minor(&self, i: usize, j: usize) -> f32 {
+        let mut matrix_3 = Mat3::default();
+        let mut count = 1;
+
+        if i > 3 || j > 3 {
+            panic!("out of bonds matrix access");
+        }
+
+        for a in 0..4 {
+            for b in 0..4 {
+                //are we in the excluded row or column?
+                if a != i && b != j {
+                    match count {
+                        1 => {
+                            matrix_3[0][0] = self[a][b];
+                            count += 1;
+                        }
+                        2 => {
+                            matrix_3[0][1] = self[a][b];
+                            count += 1;
+                        }
+                        3 => {
+                            matrix_3[0][2] = self[a][b];
+                            count += 1;
+                        }
+                        4 => {
+                            matrix_3[1][0] = self[a][b];
+                            count += 1;
+                        }
+                        5 => {
+                            matrix_3[1][1] = self[a][b];
+                            count += 1;
+                        }
+                        6 => {
+                            matrix_3[1][2] = self[a][b];
+                            count += 1;
+                        }
+                        7 => {
+                            matrix_3[2][0] = self[a][b];
+                            count += 1;
+                        }
+                        8 => {
+                            matrix_3[2][1] = self[a][b];
+                            count += 1;
+                        }
+                        9 => {
+                            matrix_3[2][2] = self[a][b];
+                            count += 1;
+                        }
+                        _ => {}
+                    }
+                }
+            }
+        }
+        matrix_3.determinant()
+    }
+
+    pub fn cofactor(&self, i: usize, j: usize) -> f32 {
+        (-1 as i32).pow((i + j) as u32) as f32 * self.minor(i, j)
+    }
+
+    pub fn determinant(&self) -> f32 {
+        let mut ret: f32 = 0.0;
+
+        for i in 0..4 {
+            ret += self[i][0] * self.cofactor(i, 0);
+        }
+        ret
+    }
+
+    pub fn inverse(&self) -> Option<Mat4> {
+        let determinant = self.determinant();
+
+        if determinant == 0.0 {
+            return None;
+        }
+
+        let div = 1.0 / determinant;
+
+        let ret = Mat4 {
+            mat: [
+                [
+                    self.cofactor(0, 0),
+                    self.cofactor(0, 1),
+                    self.cofactor(0, 2),
+                    self.cofactor(0, 3),
+                ],
+                [
+                    self.cofactor(1, 0),
+                    self.cofactor(1, 1),
+                    self.cofactor(1, 2),
+                    self.cofactor(1, 3),
+                ],
+                [
+                    self.cofactor(2, 0),
+                    self.cofactor(2, 1),
+                    self.cofactor(2, 2),
+                    self.cofactor(2, 3),
+                ],
+                [
+                    self.cofactor(3, 0),
+                    self.cofactor(3, 1),
+                    self.cofactor(3, 2),
+                    self.cofactor(3, 3),
+                ],
+            ],
+        };
+        Some(ret.transpost() * div)
     }
 
     #[inline]

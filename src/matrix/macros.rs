@@ -89,13 +89,13 @@ macro_rules! impl_mat_ops {
         impl Index<usize> for $MatN {
             type Output = $indextype;
 
-            fn index<'a>(&'a self, index: usize) -> &'a Self::Output {
+            fn index(&self, index: usize) -> &Self::Output {
                 &self.$field[index]
             }
         }
 
         impl IndexMut<usize> for $MatN {
-            fn index_mut<'a>(&'a mut self, index: usize) -> &'a mut $indextype {
+            fn index_mut(&mut self, index: usize) -> &mut $indextype {
                 &mut self.$field[index]
             }
         }

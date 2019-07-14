@@ -44,7 +44,7 @@ impl Mat2 {
 
     ///Arbitrary scale Matrix towards `n` by a factor of `k`
     #[inline]
-    pub fn scale_arb(k: f32, n: &Vec2) -> Self {
+    pub fn scale_arb(k: f32, n: Vec2) -> Self {
         let n = n.normalized();
 
         Mat2 {
@@ -73,7 +73,7 @@ impl Mat2 {
 
     ///Create a projection Matrix in the arbitrary `n` axis
     #[inline]
-    pub fn projection(n: &Vec2) -> Self {
+    pub fn projection(n: Vec2) -> Self {
         let n = n.normalized();
 
         Mat2 {
@@ -86,7 +86,7 @@ impl Mat2 {
 
     ///Reflection Matrix about the `n` axis
     #[inline]
-    pub fn reflection(n: &Vec2) -> Self {
+    pub fn reflection(n: Vec2) -> Self {
         let n = n.normalized();
 
         Mat2 {
@@ -119,7 +119,7 @@ impl Mat2 {
     }
 
     #[inline]
-    pub fn from_vec(vec: &Vec2) -> Self {
+    pub fn from_vec(vec: Vec2) -> Self {
         Mat2 {
             mat: [[vec.x, vec.y], [vec.x, vec.y]],
         }

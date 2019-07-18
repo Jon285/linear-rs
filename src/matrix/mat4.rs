@@ -146,7 +146,7 @@ impl Mat4 {
             ],
         }
     }
-    ///Creates a scale Matrix towards the arbitrary direction of `n` by a factor of `k`
+    ///Constructs a scale Matrix towards the arbitrary direction of `n` by a factor of `k`
     #[inline]
     pub fn scale_arb(k: f32, n: Vec3) -> Self {
         let n = n.normalized();
@@ -231,6 +231,55 @@ impl Mat4 {
             ],
         }
     }
+
+    #[inline]
+    pub fn perspective(fov: f32, aspect: f32, near: f32, far: f32) -> Self {
+        let x_scale = 1.0 / (aspect * (fov / 2.0).tan());
+        let y_scale = 1.0 / (fov / 2.0).tan();
+
+        Mat4 {
+            mat: [
+                [x_scale, 0.0, 0.0, 0.0],
+                [0.0, y_scale, 0.0, 0.0],
+                [0.0, 0.0, (-near - far) / (near - far), 1.0],
+                [0.0, 0.0, (2.0 * far * near) / (near - far), 0.0],
+            ],
+        }
+    }
+
+    ///Contructs a perspective matrix equivalent to the `glFrustum` one
+    #[inline]
+    pub fn frustum(left: f32, right: f32, bottom: f32, top: f32, near: f32, far: f32) -> Self {
+        let vertical = (top + bottom) / (top - bottom);
+        let horizontal = (right + left) / (right - left);
+        let depth = -(far + near) / (far - near);
+
+        Mat4 {
+            mat: [
+                [(2.0 * near) / (right - 1.0), 0.0, 0.0, 0.0],
+                [0.0, (2.0 * near) / (top - bottom), 0.0, 0.0],
+                [horizontal, vertical, depth, -1.0],
+                [0.0, 0.0, (-2.0 * far * near) / (far - near), 0.0],
+            ],
+        }
+    }
+
+    #[inline]
+    pub fn ortho(left: f32, right: f32, bottom: f32, top: f32, near: f32, far: f32) -> Self {
+        let x_trans = -((right + left) / (right - left));
+        let y_trans = -((top + bottom) / (top - bottom));
+        let z_trans = -((far + near) / (far - near));;
+
+        Mat4 {
+            mat: [
+                [2.0 / (right - left), 0.0, 0.0, 0.0],
+                [0.0, 2.0 / (top - bottom), 0.0, 0.0],
+                [0.0, 0.0, -2.0 / (far - near), 0.0],
+                [x_trans, y_trans, z_trans, 1.0],
+            ],
+        }
+    }
+
     //================================================================================================
 
     #[inline]
@@ -257,57 +306,27 @@ impl Mat4 {
         ret
     }
 
-    //early implementation, not the best design, need refactoring
+    //not the best algorithm, but works fine for the purpose of this lib
     pub fn minor(&self, i: usize, j: usize) -> f32 {
-        let mut matrix_3 = Mat3::default();
-        let mut count = 1;
-
         if i > 3 || j > 3 {
             panic!("out of bonds matrix access");
         }
+
+        let mut matrix_3 = Mat3::default();
+        let mut col = 0;
+        let mut row = 0;
 
         for a in 0..4 {
             for b in 0..4 {
                 //are we in the excluded row or column?
                 if a != i && b != j {
-                    match count {
-                        1 => {
-                            matrix_3[0][0] = self[a][b];
-                            count += 1;
-                        }
-                        2 => {
-                            matrix_3[0][1] = self[a][b];
-                            count += 1;
-                        }
-                        3 => {
-                            matrix_3[0][2] = self[a][b];
-                            count += 1;
-                        }
-                        4 => {
-                            matrix_3[1][0] = self[a][b];
-                            count += 1;
-                        }
-                        5 => {
-                            matrix_3[1][1] = self[a][b];
-                            count += 1;
-                        }
-                        6 => {
-                            matrix_3[1][2] = self[a][b];
-                            count += 1;
-                        }
-                        7 => {
-                            matrix_3[2][0] = self[a][b];
-                            count += 1;
-                        }
-                        8 => {
-                            matrix_3[2][1] = self[a][b];
-                            count += 1;
-                        }
-                        9 => {
-                            matrix_3[2][2] = self[a][b];
-                            count += 1;
-                        }
-                        _ => {}
+                    matrix_3[col][row] = self[a][b];
+                    row += 1;
+
+                    //column is filled, change to the next and reset the row
+                    if row == 3 {
+                        row = 0;
+                        col += 1;
                     }
                 }
             }
@@ -336,36 +355,15 @@ impl Mat4 {
         }
 
         let div = 1.0 / determinant;
+        let mut temp = Self::default();
 
-        let ret = Mat4 {
-            mat: [
-                [
-                    self.cofactor(0, 0),
-                    self.cofactor(0, 1),
-                    self.cofactor(0, 2),
-                    self.cofactor(0, 3),
-                ],
-                [
-                    self.cofactor(1, 0),
-                    self.cofactor(1, 1),
-                    self.cofactor(1, 2),
-                    self.cofactor(1, 3),
-                ],
-                [
-                    self.cofactor(2, 0),
-                    self.cofactor(2, 1),
-                    self.cofactor(2, 2),
-                    self.cofactor(2, 3),
-                ],
-                [
-                    self.cofactor(3, 0),
-                    self.cofactor(3, 1),
-                    self.cofactor(3, 2),
-                    self.cofactor(3, 3),
-                ],
-            ],
-        };
-        Some(ret.transpost() * div)
+        for i in 0..4 {
+            for j in 0..4 {
+                temp[j][i] = self.cofactor(i, j);
+            }
+        }
+
+        Some(temp * div)
     }
 
     #[inline]

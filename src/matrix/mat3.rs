@@ -99,7 +99,7 @@ impl Mat3 {
 
     ///Creates a projection Matrix in the plane perpendicular to the Vector `n`
     #[inline]
-    pub fn ortho_projection(n: Vec3) -> Self {
+    pub fn projection(n: Vec3) -> Self {
         let n = n.normalized();
 
         Mat3 {
@@ -241,31 +241,20 @@ impl Mat3 {
         }
 
         let mut matrix_2 = Mat2::default();
-        let mut count = 1;
+        let mut col = 0;
+        let mut row = 0;
 
         for a in 0..3 {
             for b in 0..3 {
                 //are we in the excluded row or column?
                 if a != i && b != j {
-                    //which element of the sub array are we inserting now?
-                    match count {
-                        1 => {
-                            matrix_2[0][0] = self[a][b];
-                            count += 1;
-                        }
-                        2 => {
-                            matrix_2[0][1] = self[a][b];
-                            count += 1;
-                        }
-                        3 => {
-                            matrix_2[1][0] = self[a][b];
-                            count += 1;
-                        }
-                        4 => {
-                            matrix_2[1][1] = self[a][b];
-                            count += 1;
-                        }
-                        _ => {}
+                    matrix_2[col][row] = self[a][b];
+                    row += 1;
+
+                    //column is filled, change to the next and reset the row
+                    if row == 2 {
+                        row = 0;
+                        col += 1;
                     }
                 }
             }
@@ -283,7 +272,7 @@ impl Mat3 {
     pub fn determinant(&self) -> f32 {
         let mut ret: f32 = 0.0;
 
-        //hardcoded row value since the result is the same in any other row
+        //hardcoded column value since the result is the same in any other
         for i in 0..3 {
             ret += self[0][i] * self.cofactor(0, i);
         }
@@ -300,10 +289,10 @@ impl Mat3 {
         let div = 1.0 / determinant;
         let mut adj = Mat3::default();
 
+        //create the adjoint matrix
         for i in 0..3 {
             for j in 0..3 {
-                let temp = self.cofactor(i, j);
-                adj[j][i] = temp;
+                adj[j][i] = self.cofactor(i, j);
             }
         }
         Some(adj * div)

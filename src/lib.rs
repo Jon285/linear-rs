@@ -236,12 +236,12 @@ mod tests {
     //assert_eq!(mat, mat_cmp);
     //}
 
-    //#[test]
-    //fn ident_inverse() {
-    //let mat = Mat3::default();
-    //
-    //assert_eq!(mat, mat.inverse().unwrap());
-    //}
+    #[test]
+    fn ident_inverse() {
+        let mat = Mat3::default();
+
+        assert_eq!(mat, mat.inverse().unwrap());
+    }
 
     #[test]
     fn mat3_minor() {

@@ -1,3 +1,8 @@
+#[cfg(target_arch = "x86")]
+use std::arch::x86::*;
+#[cfg(target_arch = "x86_64")]
+use std::arch::x86_64::*;
+
 use crate::vectors::Vec2;
 use crate::vectors::Vec4;
 
@@ -59,8 +64,28 @@ impl Vec3 {
 
     #[inline]
     pub fn distance_to(self, other: Vec3) -> f32 {
-        ((other.x - self.x).powi(2) + (other.y - self.y).powi(2) + (other.z - self.z).powi(2))
-            .sqrt()
+        {
+            if is_x86_feature_detected!("sse2") {
+                return unsafe { self.distance_to_sse2(other) };
+            }
+        }
+
+        self.distance_to_gen(other)
+    }
+
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+    #[target_feature(enable = "sse2")]
+    unsafe fn distance_to_sse2(self, other: Vec3) -> f32 {
+        self.distance_to_gen(other)
+    }
+
+    #[inline(always)]
+    fn distance_to_gen(self, other: Vec3) -> f32 {
+        let mut res: f32 = 0.0;
+        for i in 0..3 {
+            res = (other[i] - self[i]).powi(2);
+        }
+        res.sqrt()
     }
 
     #[inline]

@@ -56,6 +56,11 @@ impl Vec4 {
             z: self.z,
         }
     }
+
+    #[inline]
+    pub fn as_ptr(self) -> *const f32 {
+        &self.x as *const f32
+    }
 }
 
 impl_vec_ops!(Vec4, x, y, z, w = 0, 1, 2, 3);

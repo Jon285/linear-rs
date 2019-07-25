@@ -21,8 +21,8 @@ impl Vec3 {
     }
 
     #[inline]
-    pub fn squared_len(self) -> f32 {
-        self.x * self.x + self.y * self.y + self.z * self.z
+    pub fn squared_mag(self) -> f32 {
+        self.x.powi(2) + self.y.powi(2) + self.z.powi(2)
     }
 
     #[inline]
@@ -88,6 +88,11 @@ impl Vec3 {
             x: self.x,
             y: self.y,
         }
+    }
+
+    #[inline]
+    pub fn as_ptr(self) -> *const f32 {
+        &self.x as *const f32
     }
 }
 

@@ -64,12 +64,11 @@ impl Mat3 {
     ///Returns a rotation Matrix around the z-axis
     #[inline]
     pub fn rotation_z(ang: f32) -> Self {
+        let cos = ang.cos();
+        let sin = ang.sin();
+
         Mat3 {
-            mat: [
-                [ang.cos(), ang.sin(), 0.0],
-                [-ang.sin(), ang.cos(), 0.0],
-                [0.0, 0.0, 1.0],
-            ],
+            mat: [[cos, -sin, 0.0], [sin, cos, 0.0], [0.0, 0.0, 1.0]],
         }
     }
 

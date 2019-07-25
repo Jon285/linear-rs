@@ -2,6 +2,7 @@
 #![allow(unused_imports)]
 
 mod matrix;
+mod quaternions;
 mod vectors;
 
 pub use matrix::Mat2;
@@ -19,6 +20,13 @@ macro_rules! radians {
     ($ang:expr) => {
         use std::f32::consts::PI;
         $ang * (PI as $ang / 180.0)
+    };
+}
+
+#[macro_export]
+macro_rules! abs_diff_eq {
+    ($lhs:expr, $rhs:expr) => {
+        ($lhs - $rhs) < std::f32::EPSILON
     };
 }
 
@@ -255,5 +263,17 @@ mod tests {
         let mat = Mat3::new(-4.0, -3.0, 3.0, 0.0, 2.0, -2.0, 1.0, 4.0, -1.0);
 
         assert_eq!(6.0, mat.cofactor(0, 0));
+    }
+
+    #[test]
+    fn mat3_rotation() {
+        let mat = Mat3::rotation_z(-radians(180.0));
+        let vec = Vec3::new(0.0, 1.0, 0.0);
+        let res = Vec3::new(0.0, -1.0, 0.0);
+        let mul = mat * vec;
+
+        assert!(abs_diff_eq!(mul.x, res.x));
+        assert!(abs_diff_eq!(mul.y, res.y));
+        assert!(abs_diff_eq!(mul.z, res.z));
     }
 }

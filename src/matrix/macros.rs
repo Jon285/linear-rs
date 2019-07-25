@@ -113,7 +113,7 @@ macro_rules! impl_mat_ops {
 
                 for i in 0..$dimension {
                     for j in 0..$dimension {
-                        ret[j] += other[i] * self[i][j];
+                        ret[i] += other[j] * self[j][i];
                     }
                 }
                 ret

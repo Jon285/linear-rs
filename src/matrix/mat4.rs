@@ -7,7 +7,7 @@ use std::default::Default;
 #[repr(C)]
 #[derive(Debug, PartialEq, Copy, Clone)]
 pub struct Mat4 {
-    mat: [[f32; 4]; 4],
+    pub(crate) mat: [[f32; 4]; 4],
 }
 
 #[allow(dead_code)]

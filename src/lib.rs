@@ -1,13 +1,16 @@
 #![crate_type = "lib"]
 #![allow(unused_imports)]
 
+mod euler;
 mod matrix;
 mod quaternions;
 mod vectors;
 
+pub use euler::Euler;
 pub use matrix::Mat2;
 pub use matrix::Mat3;
 pub use matrix::Mat4;
+pub use quaternions::Quaternion;
 pub use vectors::Vec2;
 pub use vectors::Vec3;
 pub use vectors::Vec4;

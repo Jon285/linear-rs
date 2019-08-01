@@ -1,8 +1,12 @@
+///A column majorr 4x4 matrix
+use std::convert::From;
+use std::default::Default;
+
+use crate::euler::Euler;
 use crate::matrix::Mat3;
+use crate::quaternions::Quaternion;
 use crate::vectors::Vec3;
 use crate::vectors::Vec4;
-
-use std::default::Default;
 
 #[repr(C)]
 #[derive(Debug, PartialEq, Copy, Clone)]
@@ -247,7 +251,7 @@ impl Mat4 {
         }
     }
 
-    ///Contructs a perspective matrix equivalent to the `glFrustum` one
+    ///Contructs a perspective matrix. Equivalent to `glFrustum`
     #[inline]
     pub fn frustum(left: f32, right: f32, bottom: f32, top: f32, near: f32, far: f32) -> Self {
         let vertical = (top + bottom) / (top - bottom);
@@ -385,5 +389,68 @@ impl Default for Mat4 {
         Mat4::new(
             1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0,
         )
+    }
+}
+
+impl From<Quaternion> for Mat4 {
+    fn from(quat: Quaternion) -> Self {
+        let x = quat.v.x;
+        let y = quat.v.y;
+        let z = quat.v.z;
+        let w = quat.w;
+
+        Mat4 {
+            mat: [
+                [
+                    1.0 - 2.0 * y.powi(2) - 2.0 * z.powi(2),
+                    2.0 * x * y + 2.0 * w * z,
+                    2.0 * x * z - 2.0 * w * y,
+                    0.0,
+                ],
+                [
+                    2.0 * x * y - 2.0 * w * z,
+                    1.0 - 2.0 * x.powi(2) - 2.0 * z.powi(2),
+                    2.0 * y * z + 2.0 * w * x,
+                    0.0,
+                ],
+                [
+                    2.0 * x * z + 2.0 * w * y,
+                    2.0 * y * z - 2.0 * w * x,
+                    1.0 - 2.0 * x.powi(2) - 2.0 * y.powi(2),
+                    0.0,
+                ],
+                [0.0, 0.0, 0.0, 1.0],
+            ],
+        }
+    }
+}
+
+impl From<Euler> for Mat4 {
+    fn from(euler: Euler) -> Self {
+        let cy = euler.yaw.cos();
+        let cp = euler.pitch.cos();
+        let cr = euler.row.cos();
+        let sy = euler.yaw.cos();
+        let sp = euler.pitch.cos();
+        let sr = euler.row.sin();
+
+        Mat4 {
+            mat: [
+                [
+                    cy * cr + sy * sp * sr,
+                    sr * cp,
+                    -sy * cr + cy * sp * sr,
+                    0.0,
+                ],
+                [
+                    -cy * sr + sy * sp * cr,
+                    cr * cp,
+                    sr * sy + cy * sp * cr,
+                    0.0,
+                ],
+                [sy * cp, -sp, cy * cp, 0.0],
+                [0.0, 0.0, 0.0, 1.0],
+            ],
+        }
     }
 }

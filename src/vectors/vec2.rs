@@ -1,3 +1,5 @@
+use std::convert::From;
+
 use crate::vectors::Vec3;
 
 #[repr(C)]
@@ -58,3 +60,21 @@ impl Vec2 {
 }
 
 impl_vec_ops!(Vec2, x, y = 0, 1);
+
+impl From<[f32; 2]> for Vec2 {
+    fn from(array: [f32; 2]) -> Self {
+        Vec2 {
+            x: array[0],
+            y: array[1],
+        }
+    }
+}
+
+impl From<(f32, f32)> for Vec2 {
+    fn from(tuple: (f32, f32)) -> Self {
+        Vec2 {
+            x: tuple.0,
+            y: tuple.1,
+        }
+    }
+}

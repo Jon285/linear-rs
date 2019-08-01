@@ -1,5 +1,6 @@
 use crate::vectors::Vec2;
 
+use std::convert::From;
 use std::default::Default;
 
 #[repr(C)]
@@ -114,18 +115,6 @@ impl Mat2 {
     //====================================================================================
 
     #[inline]
-    pub fn from_array(arr: &[[f32; 2]; 2]) -> Self {
-        Mat2 { mat: *arr }
-    }
-
-    #[inline]
-    pub fn from_vec(vec: Vec2) -> Self {
-        Mat2 {
-            mat: [[vec.x, vec.y], [vec.x, vec.y]],
-        }
-    }
-
-    #[inline]
     pub fn transpost(&self) -> Self {
         Mat2 {
             mat: [[self[0][0], self[1][0]], [self[0][1], self[1][1]]],
@@ -162,6 +151,20 @@ impl Default for Mat2 {
     fn default() -> Self {
         Mat2 {
             mat: [[1.0, 0.0], [0.0, 1.0]],
+        }
+    }
+}
+
+impl From<[[f32; 2]; 2]> for Mat2 {
+    fn from(array: [[f32; 2]; 2]) -> Self {
+        Mat2 { mat: array }
+    }
+}
+
+impl From<(Vec2, Vec2)> for Mat2 {
+    fn from(tuple: (Vec2, Vec2)) -> Self {
+        Mat2 {
+            mat: [[tuple.0.x, tuple.0.y], [tuple.1.x, tuple.1.y]],
         }
     }
 }

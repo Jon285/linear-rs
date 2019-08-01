@@ -1,7 +1,10 @@
-use crate::matrix::Mat2;
-use crate::vectors::Vec3;
-
+use std::convert::From;
 use std::default::Default;
+
+use crate::euler::Euler;
+use crate::matrix::Mat2;
+use crate::quaternions::Quaternion;
+use crate::vectors::Vec3;
 
 #[repr(C)]
 #[derive(Copy, Clone, Debug, PartialEq)]
@@ -315,6 +318,53 @@ impl Default for Mat3 {
     fn default() -> Self {
         Mat3 {
             mat: [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]],
+        }
+    }
+}
+impl From<Quaternion> for Mat3 {
+    fn from(quat: Quaternion) -> Self {
+        let x = quat.v.x;
+        let y = quat.v.y;
+        let z = quat.v.z;
+        let w = quat.w;
+
+        Mat3 {
+            mat: [
+                [
+                    1.0 - 2.0 * y.powi(2) - 2.0 * z.powi(2),
+                    2.0 * x * y + 2.0 * w * z,
+                    2.0 * x * z - 2.0 * w * y,
+                ],
+                [
+                    2.0 * x * y - 2.0 * w * z,
+                    1.0 - 2.0 * x.powi(2) - 2.0 * z.powi(2),
+                    2.0 * y * z + 2.0 * w * x,
+                ],
+                [
+                    2.0 * x * z + 2.0 * w * y,
+                    2.0 * y * z - 2.0 * w * x,
+                    1.0 - 2.0 * x.powi(2) - 2.0 * y.powi(2),
+                ],
+            ],
+        }
+    }
+}
+
+impl From<Euler> for Mat3 {
+    fn from(euler: Euler) -> Self {
+        let cy = euler.yaw.cos();
+        let cp = euler.pitch.cos();
+        let cr = euler.row.cos();
+        let sy = euler.yaw.cos();
+        let sp = euler.pitch.cos();
+        let sr = euler.row.sin();
+
+        Mat3 {
+            mat: [
+                [cy * cr + sy * sp * sr, sr * cp, -sy * cr + cy * sp * sr],
+                [-cy * sr + sy * sp * cr, cr * cp, sr * sy + cy * sp * cr],
+                [sy * cp, -sp, cy * cp],
+            ],
         }
     }
 }

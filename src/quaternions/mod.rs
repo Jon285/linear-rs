@@ -1,10 +1,13 @@
 ///A purely rotation Quaternion formed by a scalar and a vector.
-use super::Mat4;
-use super::Vec3;
+use std::convert::From;
 use std::ops::*;
 
+use super::Mat3;
+use super::Mat4;
+use super::Vec3;
+
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Default)]
 pub struct Quaternion {
     pub w: f32,
     pub v: Vec3,
@@ -74,21 +77,19 @@ impl Quaternion {
             w2 = other;
         }
 
-        let k0: f32;
-        let k1: f32;
-
-        if omega_cos > 0.9999 {
-            k0 = 1.0 - t;
-            k1 = t;
+        let (k0, k1) = if omega_cos > 0.9999 {
+            (1.0 - t, t)
         } else {
             let omega_sin = (1.0 - omega_cos * omega_cos).sqrt();
             let omega = omega_sin.atan2(omega_cos);
 
             let inverse = 1.0 / omega_sin;
 
-            k0 = ((1.0 - t) * omega).sin() * inverse;
-            k1 = (t * omega).sin() * inverse;
-        }
+            (
+                ((1.0 - t) * omega).sin() * inverse,
+                (t * omega).sin() * inverse,
+            )
+        };
 
         Quaternion {
             w: self.w * k0 + w2.w * k1,
@@ -97,37 +98,6 @@ impl Quaternion {
                 self.v.y * k0 + w2.v.y * k1,
                 self.v.z * k0 + w2.v.z * k1,
             ),
-        }
-    }
-
-    pub fn into_mat4(self) -> Mat4 {
-        let x = self.v.x;
-        let y = self.v.y;
-        let z = self.v.z;
-        let w = self.w;
-
-        Mat4 {
-            mat: [
-                [
-                    1.0 - 2.0 * y.powi(2) - 2.0 * z.powi(2),
-                    2.0 * x * y + 2.0 * w * z,
-                    2.0 * x * z - 2.0 * w * y,
-                    0.0,
-                ],
-                [
-                    2.0 * x * y - 2.0 * w * z,
-                    1.0 - 2.0 * x.powi(2) - 2.0 * z.powi(2),
-                    2.0 * y * z + 2.0 * w * x,
-                    0.0,
-                ],
-                [
-                    2.0 * x * z + 2.0 * w * y,
-                    2.0 * y * z - 2.0 * w * x,
-                    1.0 - 2.0 * x.powi(2) - 2.0 * y.powi(2),
-                    0.0,
-                ],
-                [0.0, 0.0, 0.0, 1.0],
-            ],
         }
     }
 }
@@ -161,6 +131,126 @@ impl Neg for Quaternion {
         Quaternion {
             w: -self.w,
             v: -self.v,
+        }
+    }
+}
+
+#[allow(non_snake_case)]
+impl From<Mat3> for Quaternion {
+    fn from(mat: Mat3) -> Self {
+        let mut ret = Quaternion::default();
+
+        let W = mat[0][0] + mat[1][1] + mat[2][2];
+        let X = mat[0][0] - mat[1][1] + mat[2][2];
+        let Y = mat[1][1] - mat[0][0] - mat[2][2];
+        let Z = mat[2][2] - mat[0][0] - mat[1][1];
+
+        let mut index = 0;
+        let mut biggest = W;
+
+        if X > biggest {
+            biggest = X;
+            index = 1;
+        }
+
+        if Y > biggest {
+            biggest = Y;
+            index = 2;
+        }
+
+        if Z > biggest {
+            biggest = Z;
+            index = 3;
+        }
+
+        let largest = (biggest + 1.0).sqrt() * 0.5;
+        let mult = 0.25 / largest;
+
+        match index {
+            0 => {
+                ret.w = largest;
+                ret.v.x = (mat[2][1] - mat[1][2]) * mult;
+                ret.v.y = (mat[0][2] - mat[2][0]) * mult;
+                ret.v.z = (mat[1][0] - mat[0][1]) * mult;
+                ret
+            }
+
+            1 => {
+                ret.v.x = largest;
+                ret.w = (mat[2][1] - mat[1][2]) * mult;
+                ret.v.y = (mat[1][0] + mat[0][1]) * mult;
+                ret.v.z = (mat[0][2] + mat[2][0]) * mult;
+                ret
+            }
+
+            2 => {
+                ret.v.y = largest;
+                ret.w = (mat[0][2] - mat[2][0]) * mult;
+                ret.v.x = (mat[1][0] + mat[0][1]) * mult;
+                ret.v.z = (mat[2][1] + mat[1][2]) * mult;
+                ret
+            }
+            _ => ret,
+        }
+    }
+}
+
+#[allow(non_snake_case)]
+impl From<Mat4> for Quaternion {
+    fn from(mat: Mat4) -> Self {
+        let mut ret = Quaternion::default();
+
+        let W = mat[0][0] + mat[1][1] + mat[2][2];
+        let X = mat[0][0] - mat[1][1] + mat[2][2];
+        let Y = mat[1][1] - mat[0][0] - mat[2][2];
+        let Z = mat[2][2] - mat[0][0] - mat[1][1];
+
+        let mut index = 0;
+        let mut biggest = W;
+
+        if X > biggest {
+            biggest = X;
+            index = 1;
+        }
+
+        if Y > biggest {
+            biggest = Y;
+            index = 2;
+        }
+
+        if Z > biggest {
+            biggest = Z;
+            index = 3;
+        }
+
+        let largest = (biggest + 1.0).sqrt() * 0.5;
+        let mult = 0.25 / largest;
+
+        match index {
+            0 => {
+                ret.w = largest;
+                ret.v.x = (mat[2][1] - mat[1][2]) * mult;
+                ret.v.y = (mat[0][2] - mat[2][0]) * mult;
+                ret.v.z = (mat[1][0] - mat[0][1]) * mult;
+                ret
+            }
+
+            1 => {
+                ret.v.x = largest;
+                ret.w = (mat[2][1] - mat[1][2]) * mult;
+                ret.v.y = (mat[1][0] + mat[0][1]) * mult;
+                ret.v.z = (mat[0][2] + mat[2][0]) * mult;
+                ret
+            }
+
+            2 => {
+                ret.v.y = largest;
+                ret.w = (mat[0][2] - mat[2][0]) * mult;
+                ret.v.x = (mat[1][0] + mat[0][1]) * mult;
+                ret.v.z = (mat[2][1] + mat[1][2]) * mult;
+                ret
+            }
+            _ => ret,
         }
     }
 }

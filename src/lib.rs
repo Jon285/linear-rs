@@ -15,28 +15,11 @@ pub use vectors::Vec2;
 pub use vectors::Vec3;
 pub use vectors::Vec4;
 
-//Still thinking if an inline or macro would suit better
-#[macro_export]
-macro_rules! radians {
-    () => {};
-
-    ($ang:expr) => {
-        use std::f32::consts::PI;
-        $ang * (PI as $ang / 180.0)
-    };
-}
-
 #[macro_export]
 macro_rules! abs_diff_eq {
     ($lhs:expr, $rhs:expr) => {
         ($lhs - $rhs) < std::f32::EPSILON
     };
-}
-
-#[inline]
-pub fn radians(ang: f32) -> f32 {
-    use std::f32::consts::PI;
-    ang * (PI / 180.0)
 }
 
 #[cfg(test)]
@@ -270,7 +253,7 @@ mod tests {
 
     #[test]
     fn mat3_rotation() {
-        let mat = Mat3::rotation_z(-radians(180.0));
+        let mat = Mat3::rotation_z(-180.0_f32.to_radians());
         let vec = Vec3::new(0.0, 1.0, 0.0);
         let res = Vec3::new(0.0, -1.0, 0.0);
         let mul = mat * vec;
@@ -278,5 +261,19 @@ mod tests {
         assert!(abs_diff_eq!(mul.x, res.x));
         assert!(abs_diff_eq!(mul.y, res.y));
         assert!(abs_diff_eq!(mul.z, res.z));
+    }
+
+    #[test]
+    fn quaternion_rotation() {
+        let quat = Quaternion::new(-90.0_f32.to_radians(), Vec3::new(0.0, 0.0, 1.0));
+        let mat = Mat4::from(quat);
+        let vec = Vec4::new(1.0, 0.0, 0.0, 1.0);
+        let res = Vec4::new(0.0, -1.0, 0.0, 1.0);
+        let mul = mat * vec;
+
+        assert!(abs_diff_eq!(mul.x, res.x));
+        assert!(abs_diff_eq!(mul.y, res.y));
+        assert!(abs_diff_eq!(mul.z, res.z));
+        assert!(abs_diff_eq!(mul.w, res.w));
     }
 }

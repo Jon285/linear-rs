@@ -1,4 +1,3 @@
-///A column majorr 4x4 matrix
 use std::convert::From;
 use std::default::Default;
 
@@ -8,6 +7,7 @@ use crate::quaternions::Quaternion;
 use crate::vectors::Vec3;
 use crate::vectors::Vec4;
 
+///A column major 4x4 matrix
 #[repr(C)]
 #[derive(Debug, PartialEq, Copy, Clone)]
 pub struct Mat4 {
@@ -53,18 +53,6 @@ impl Mat4 {
                 [0.0, 0.0, 0.0, 0.0],
                 [0.0, 0.0, 0.0, 0.0],
                 [0.0, 0.0, 0.0, 0.0],
-            ],
-        }
-    }
-
-    #[inline]
-    pub fn from_vec(f: Vec4, s: Vec4, t: Vec4, l: Vec4) -> Self {
-        Mat4 {
-            mat: [
-                [f.x, f.y, f.z, f.w],
-                [s.x, s.y, s.z, s.w],
-                [t.x, t.y, t.z, t.w],
-                [l.x, l.y, l.z, l.w],
             ],
         }
     }
@@ -268,6 +256,7 @@ impl Mat4 {
         }
     }
 
+    ///Constructs an orthographic projection matrix
     #[inline]
     pub fn ortho(left: f32, right: f32, bottom: f32, top: f32, near: f32, far: f32) -> Self {
         let x_trans = -((right + left) / (right - left));
@@ -280,6 +269,24 @@ impl Mat4 {
                 [0.0, 2.0 / (top - bottom), 0.0, 0.0],
                 [0.0, 0.0, -2.0 / (far - near), 0.0],
                 [x_trans, y_trans, z_trans, 1.0],
+            ],
+        }
+    }
+
+    ///Constructs a new view matrix based on the `eye` (aka camera position),
+    ///the `direction` to look and and the camera's `up` direction.
+    #[inline]
+    pub fn look_at(eye: Vec3, direction: Vec3, up: Vec3) -> Self {
+        let z = (eye - direction).normalized();
+        let x = up.cross(z).normalized();
+        let y = z.cross(x).normalized();
+
+        Mat4 {
+            mat: [
+                [x.x, y.x, z.x, 0.0],
+                [x.y, y.y, z.y, 0.0],
+                [x.z, y.z, z.z, 0.0],
+                [-x.dot(eye), -y.dot(eye), -z.dot(eye), 1.0],
             ],
         }
     }
@@ -450,6 +457,25 @@ impl From<Euler> for Mat4 {
                 ],
                 [sy * cp, -sp, cy * cp, 0.0],
                 [0.0, 0.0, 0.0, 1.0],
+            ],
+        }
+    }
+}
+
+impl From<[[f32; 4]; 4]> for Mat4 {
+    fn from(array: [[f32; 4]; 4]) -> Self {
+        Mat4 { mat: array }
+    }
+}
+
+impl From<(Vec4, Vec4, Vec4, Vec4)> for Mat4 {
+    fn from(tuple: (Vec4, Vec4, Vec4, Vec4)) -> Self {
+        Mat4 {
+            mat: [
+                [tuple.0.x, tuple.0.y, tuple.0.z, tuple.0.w],
+                [tuple.1.x, tuple.1.y, tuple.1.z, tuple.1.w],
+                [tuple.2.x, tuple.2.y, tuple.2.z, tuple.2.w],
+                [tuple.3.x, tuple.3.y, tuple.3.z, tuple.3.w],
             ],
         }
     }

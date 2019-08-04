@@ -24,6 +24,11 @@ impl Vec4 {
     }
 
     #[inline]
+    pub fn squared_mag(self) -> f32 {
+        self.x.powi(2) + self.y.powi(2) + self.z.powi(2) + self.w.powi(2)
+    }
+
+    #[inline]
     pub fn dot(self, other: Vec4) -> f32 {
         self.x * other.x + self.y * other.y + self.z * other.z + self.w * other.w
     }
@@ -62,6 +67,11 @@ impl Vec4 {
     #[inline]
     pub fn as_ptr(self) -> *const f32 {
         &self.x as *const f32
+    }
+
+    #[inline]
+    pub fn as_mut_ptr(&mut self) -> *mut f32 {
+        &mut self.x as *mut f32
     }
 }
 

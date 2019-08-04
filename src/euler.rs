@@ -3,6 +3,7 @@ use std::f32::consts::FRAC_PI_2;
 
 use super::Mat3;
 use super::Mat4;
+use super::Quaternion;
 
 #[derive(Debug, Copy, Clone, Default, PartialEq)]
 pub struct Euler {
@@ -63,5 +64,28 @@ impl From<Mat4> for Euler {
             ret.yaw = mat[1][2].atan2(mat[2][2]);
         }
         ret
+    }
+}
+
+impl From<Quaternion> for Euler {
+    fn from(quat: Quaternion) -> Self {
+        let sp = -2.0 * (quat.v.y * quat.v.z - quat.w * quat.v.x);
+
+        if sp.abs() > 0.99999 {
+            Euler {
+                yaw: (-quat.v.x * quat.v.z + quat.w * quat.v.y)
+                    .atan2(0.5 - quat.v.y.powi(2) - quat.v.z.powi(2)),
+                pitch: FRAC_PI_2 * sp,
+                row: 0.0,
+            }
+        } else {
+            Euler {
+                pitch: sp.asin(),
+                yaw: (quat.v.x * quat.v.z + quat.w * quat.v.y)
+                    .atan2(0.5 - quat.v.x.powi(2) - quat.v.y.powi(2)),
+                row: (quat.v.y * quat.v.x + quat.w * quat.v.z)
+                    .atan2(0.5 - quat.v.x.powi(2) - quat.v.z.powi(2)),
+            }
+        }
     }
 }

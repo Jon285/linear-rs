@@ -1,11 +1,12 @@
-///A purely rotation Quaternion formed by a scalar and a vector.
 use std::convert::From;
 use std::ops::*;
 
+use super::Euler;
 use super::Mat3;
 use super::Mat4;
 use super::Vec3;
 
+///A purely rotation Quaternion formed by a scalar and a vector.
 #[repr(C)]
 #[derive(Debug, Copy, Clone, Default)]
 pub struct Quaternion {
@@ -15,7 +16,8 @@ pub struct Quaternion {
 
 #[allow(dead_code)]
 impl Quaternion {
-    ///Constructs a new Quaternion with a angle and a axis of rotation
+    ///Constructs a new rotation Quaternion with a angle and a axis of rotation
+    #[inline]
     pub fn new(ang: f32, axis: Vec3) -> Self {
         let axis = axis.normalized();
         let div = ang / 2.0;
@@ -24,6 +26,12 @@ impl Quaternion {
             w: div.cos(),
             v: div.sin() * axis,
         }
+    }
+
+    ///Constructs a new standard Quaternion with the passed scalar and vector
+    #[inline]
+    pub fn new_sv(w: f32, v: Vec3) -> Self {
+        Quaternion { w, v }
     }
 
     #[inline]
@@ -39,6 +47,7 @@ impl Quaternion {
         }
     }
 
+    ///Returns a Quaternion that corresponds to the displacement between `self` and `other`
     #[inline]
     pub fn displacement_from(self, other: Quaternion) -> Self {
         other * self.conjugate()
@@ -66,6 +75,7 @@ impl Quaternion {
         }
     }
 
+    ///Calculates the spherical interpolation between `self` and `other` by the amount of `t`
     pub fn slerp(self, other: Quaternion, t: f32) -> Self {
         let mut omega_cos = self.dot(other);
         let w2: Quaternion;
@@ -250,7 +260,31 @@ impl From<Mat4> for Quaternion {
                 ret.v.z = (mat[2][1] + mat[1][2]) * mult;
                 ret
             }
+            3 => {
+                ret.v.z = largest;
+                ret.w = (mat[1][0] - mat[0][1]) * mult;
+                ret.v.x = (mat[0][2] + mat[2][0]) * mult;
+                ret.v.y = (mat[2][1] + mat[1][2]) * mult;
+                ret
+            }
             _ => ret,
+        }
+    }
+}
+
+impl From<Euler> for Quaternion {
+    fn from(euler: Euler) -> Self {
+        let yaw = euler.yaw / 2.0;
+        let pitch = euler.pitch / 2.0;
+        let row = euler.row / 2.0;
+
+        let w = yaw.cos() * pitch.cos() * row.cos() + yaw.sin() * pitch.sin() * row.sin();
+        let x = yaw.cos() * pitch.sin() * row.cos() + yaw.sin() * pitch.cos() * row.sin();
+        let y = yaw.sin() * pitch.cos() * row.cos() - yaw.cos() * pitch.sin() * row.sin();
+        let z = yaw.cos() * pitch.cos() * row.sin() - yaw.sin() * pitch.sin() * row.cos();
+        Quaternion {
+            w,
+            v: Vec3::new(x, y, z),
         }
     }
 }

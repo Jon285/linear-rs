@@ -127,7 +127,7 @@ impl Mat3 {
                 [
                     n.x.powi(2) * factor + cos,
                     n.x * n.y * factor + n.z * sin,
-                    n.x * n.z * factor - n.z * sin,
+                    n.x * n.z * factor - n.y * sin,
                 ],
                 [
                     n.x * n.y * factor - n.z * sin,
@@ -364,6 +364,24 @@ impl From<Euler> for Mat3 {
                 [cy * cr + sy * sp * sr, sr * cp, -sy * cr + cy * sp * sr],
                 [-cy * sr + sy * sp * cr, cr * cp, sr * sy + cy * sp * cr],
                 [sy * cp, -sp, cy * cp],
+            ],
+        }
+    }
+}
+
+impl From<[[f32; 3]; 3]> for Mat3 {
+    fn from(array: [[f32; 3]; 3]) -> Self {
+        Mat3 { mat: array }
+    }
+}
+
+impl From<(Vec3, Vec3, Vec3)> for Mat3 {
+    fn from(tuple: (Vec3, Vec3, Vec3)) -> Self {
+        Mat3 {
+            mat: [
+                [tuple.0.x, tuple.0.y, tuple.0.z],
+                [tuple.1.x, tuple.1.y, tuple.1.z],
+                [tuple.2.x, tuple.2.y, tuple.2.z],
             ],
         }
     }

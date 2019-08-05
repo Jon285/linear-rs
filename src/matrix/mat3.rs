@@ -57,9 +57,9 @@ impl Mat3 {
     pub fn rotation_y(ang: f32) -> Self {
         Mat3 {
             mat: [
-                [ang.cos(), 0.0, ang.sin()],
+                [ang.cos(), 0.0, -ang.sin()],
                 [0.0, 1.0, 0.0],
-                [-ang.sin(), 0.0, ang.cos()],
+                [ang.sin(), 0.0, ang.cos()],
             ],
         }
     }
@@ -71,7 +71,7 @@ impl Mat3 {
         let sin = ang.sin();
 
         Mat3 {
-            mat: [[cos, -sin, 0.0], [sin, cos, 0.0], [0.0, 0.0, 1.0]],
+            mat: [[cos, sin, 0.0], [-sin, cos, 0.0], [0.0, 0.0, 1.0]],
         }
     }
 
@@ -206,13 +206,6 @@ impl Mat3 {
     }
 
     //=============================================================================================================
-
-    #[inline]
-    pub fn from_vec(f: Vec3, s: Vec3, t: Vec3) -> Self {
-        Mat3 {
-            mat: [[f.x, f.y, f.z], [s.x, s.y, s.z], [t.x, t.y, t.z]],
-        }
-    }
 
     #[inline]
     pub fn transpose(&mut self) {

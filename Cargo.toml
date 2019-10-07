@@ -1,5 +1,5 @@
 [package]
-name = "math_rs"
+name = "linear"
 version = "0.1.0"
 authors = ["Jonatas <jbmagalhaes28@gmail.com>"]
 edition = "2018"

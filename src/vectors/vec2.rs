@@ -1,18 +1,22 @@
+use num_traits::Num;
+
 use std::convert::From;
 
 use crate::vectors::Vec3;
 
+pub trait Scalar: Num + Copy + Clone + PartialEq + Default {}
+
 #[repr(C)]
 #[derive(Default, Copy, Clone, PartialEq, Debug)]
-pub struct Vec2 {
-    pub x: f32,
-    pub y: f32,
+pub struct Vec2<T: Scalar> {
+    pub x: T,
+    pub y: T,
 }
 
 #[allow(dead_code)]
-impl Vec2 {
+impl<T: Num> Vec2<T> {
     #[inline]
-    pub fn new(x: f32, y: f32) -> Self {
+    pub fn new(x: T, y: T) -> Self {
         Vec2 { x, y }
     }
 

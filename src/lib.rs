@@ -1,6 +1,8 @@
 #![crate_type = "lib"]
 #![allow(unused_imports)]
 
+extern crate num_traits;
+
 mod euler;
 mod matrix;
 mod quaternions;

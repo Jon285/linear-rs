@@ -13,7 +13,7 @@ pub use euler::Euler;
 pub use matrix::Mat2;
 pub use matrix::Mat3;
 pub use matrix::Mat4;
-pub use numtrait::{FloatScalar, NumScalar};
+pub use numtrait::{FloatScalar, RealScalar};
 pub use quaternions::Quaternion;
 pub use vectors::Vec2;
 pub use vectors::Vec3;

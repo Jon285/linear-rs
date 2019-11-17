@@ -1,27 +1,35 @@
+use num_traits::identities;
+
 use crate::vectors::Vec2;
+use crate::RealScalar;
 
 use std::convert::From;
 use std::default::Default;
 
 #[repr(C)]
 #[derive(Debug, Clone, Copy, PartialEq)]
-pub struct Mat2 {
-    mat: [[f32; 2]; 2],
+pub struct Mat2<T> {
+    mat: [[T; 2]; 2],
 }
 
 #[allow(dead_code)]
-impl Mat2 {
+impl<T> Mat2<T> {
     #[inline]
-    pub fn new(s0e0: f32, s0e1: f32, s1e0: f32, s1e1: f32) -> Self {
+    pub fn new(s0e0: T, s0e1: T, s1e0: T, s1e1: T) -> Self {
         Mat2 {
             mat: [[s0e0, s0e1], [s1e0, s1e1]],
         }
     }
+}
 
+impl<T: RealScalar> Mat2<T> {
     #[inline]
     pub fn zero() -> Self {
         Mat2 {
-            mat: [[0.0, 0.0], [0.0, 0.0]],
+            mat: [
+                [identities::zero::<T>(), identities::zero::<T>()],
+                [identities::zero::<T>(), identities::zero::<T>()],
+            ],
         }
     }
 
@@ -29,7 +37,7 @@ impl Mat2 {
 
     ///Returns a rotation Matrix around the origin
     #[inline]
-    pub fn rotation(ang: f32) -> Self {
+    pub fn rotation(ang: T) -> Self {
         Mat2 {
             mat: [[ang.cos(), -ang.sin()], [ang.sin(), ang.cos()]],
         }
@@ -37,7 +45,7 @@ impl Mat2 {
 
     ///Uniform scale Matrix in all directions by a factor `k`
     #[inline]
-    pub fn scale(k: f32) -> Self {
+    pub fn scale(k: T) -> Self {
         Mat2 {
             mat: [[k, 0.0], [0.0, k]],
         }
@@ -45,7 +53,7 @@ impl Mat2 {
 
     ///Arbitrary scale Matrix towards `n` by a factor of `k`
     #[inline]
-    pub fn scale_arb(k: f32, n: Vec2) -> Self {
+    pub fn scale_arb(k: T, n: Vec2<T>) -> Self {
         let n = n.normalized();
 
         Mat2 {
@@ -74,20 +82,21 @@ impl Mat2 {
 
     ///Create a projection Matrix in the arbitrary `n` axis
     #[inline]
-    pub fn projection(n: Vec2) -> Self {
+    pub fn projection(n: Vec2<T>) -> Self {
         let n = n.normalized();
+        let one = identities::one::<T>();
 
         Mat2 {
             mat: [
-                [1.0 - n.x.powi(2), -n.x * n.y],
-                [-n.x * n.y, 1.0 - n.y.powi(2)],
+                [one - n.x.powi(2), -n.x * n.y],
+                [-n.x * n.y, one - n.y.powi(2)],
             ],
         }
     }
 
     ///Reflection Matrix about the `n` axis
     #[inline]
-    pub fn reflection(n: Vec2) -> Self {
+    pub fn reflection(n: Vec2<T>) -> Self {
         let n = n.normalized();
 
         Mat2 {
@@ -99,14 +108,14 @@ impl Mat2 {
     }
 
     #[inline]
-    pub fn shearing_x(s: f32) -> Self {
+    pub fn shearing_x(s: T) -> Self {
         Mat2 {
             mat: [[1.0, 0.0], [s, 1.0]],
         }
     }
 
     #[inline]
-    pub fn shearing_y(s: f32) -> Self {
+    pub fn shearing_y(s: T) -> Self {
         Mat2 {
             mat: [[1.0, s], [0.0, 0.0]],
         }
@@ -129,40 +138,43 @@ impl Mat2 {
     }
 
     #[inline]
-    pub fn determinant(&self) -> f32 {
+    pub fn determinant(&self) -> T {
         self[0][0] * self[1][1] - self[1][0] * self[0][1]
     }
 
     #[inline]
-    pub fn as_ptr(&self) -> *const f32 {
-        &self[0][0] as *const f32
+    pub fn as_ptr(&self) -> *const T {
+        &self[0][0] as *const T
     }
 
     #[inline]
-    pub fn as_mut_ptr(&mut self) -> *mut f32 {
-        &mut self[0][0] as *mut f32
+    pub fn as_mut_ptr(&mut self) -> *mut T {
+        &mut self[0][0] as *mut T
     }
 }
 
-impl_mat_ops!(Mat2, mat, 2, [f32; 2]);
-impl_mat_ops!(Mat2, Vec2, 2);
+// impl_mat_ops!(Mat2, mat, 2, [T; 2]);
+// impl_mat_ops!(Mat2, Vec2, 2);
 
-impl Default for Mat2 {
+impl<T> Default for Mat2<T> {
     fn default() -> Self {
         Mat2 {
-            mat: [[1.0, 0.0], [0.0, 1.0]],
+            mat: [
+                [identities::one::<T>(), identities::zero::<T>()],
+                [identities::zero::<T>(), identities::one::<T>()],
+            ],
         }
     }
 }
 
-impl From<[[f32; 2]; 2]> for Mat2 {
-    fn from(array: [[f32; 2]; 2]) -> Self {
+impl<T> From<[[T; 2]; 2]> for Mat2<T> {
+    fn from(array: [[T; 2]; 2]) -> Self {
         Mat2 { mat: array }
     }
 }
 
-impl From<(Vec2, Vec2)> for Mat2 {
-    fn from(tuple: (Vec2, Vec2)) -> Self {
+impl<T> From<(Vec2<T>, Vec2<T>)> for Mat2<T> {
+    fn from(tuple: (Vec2<T>, Vec2<T>)) -> Self {
         Mat2 {
             mat: [[tuple.0.x, tuple.0.y], [tuple.1.x, tuple.1.y]],
         }

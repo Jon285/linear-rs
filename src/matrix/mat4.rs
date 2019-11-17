@@ -261,7 +261,7 @@ impl Mat4 {
     pub fn ortho(left: f32, right: f32, bottom: f32, top: f32, near: f32, far: f32) -> Self {
         let x_trans = -((right + left) / (right - left));
         let y_trans = -((top + bottom) / (top - bottom));
-        let z_trans = -((far + near) / (far - near));;
+        let z_trans = -((far + near) / (far - near));
 
         Mat4 {
             mat: [
@@ -388,8 +388,8 @@ impl Mat4 {
     }
 }
 
-impl_mat_ops!(Mat4, mat, 4, [f32; 4]);
-impl_mat_ops!(Mat4, Vec4, 4);
+// impl_mat_ops!(Mat4, mat, 4, [f32; 4]);
+// impl_mat_ops!(Mat4, Vec4, 4);
 
 impl Default for Mat4 {
     fn default() -> Self {

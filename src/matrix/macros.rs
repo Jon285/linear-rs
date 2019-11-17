@@ -105,7 +105,7 @@ macro_rules! impl_mat_ops {
     ($MatN:ident, $VecN:ident, $dimension:expr) => {
         use std::ops::Mul;
 
-        impl Mul<$VecN> for $MatN {
+        impl<T: NumScalar> Mul<$VecN<T>> for $MatN<T> {
             type Output = $VecN;
 
             fn mul(self, other: $VecN) -> $VecN {

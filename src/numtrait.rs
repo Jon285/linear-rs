@@ -1,12 +1,12 @@
 use std::fmt;
 
 use crate::vectors::Vec2;
-use num_traits::{Float, Num, NumOps};
+use num_traits::{real::Real, Float};
 
-pub trait NumScalar: Copy + Clone + Num + Default + fmt::Debug {}
+pub trait RealScalar: Copy + Clone + Real + Default + fmt::Debug {}
 
-impl<T> NumScalar for T where T: Copy + Clone + Num + fmt::Debug {}
+impl<T> RealScalar for T where T: Copy + Clone + fmt::Debug {}
 
-pub trait FloatScalar: NumScalar + Float {}
+pub trait FloatScalar: RealScalar + Float {}
 
-impl<T> FloatScalar for T where T: NumScalar + Float {}
+impl<T> FloatScalar for T where T: RealScalar + Float {}

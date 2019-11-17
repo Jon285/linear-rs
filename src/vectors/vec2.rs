@@ -4,7 +4,7 @@ use num_traits::Num;
 use std::convert::From;
 
 use crate::vectors::Vec3;
-use crate::{FloatScalar, NumScalar};
+use crate::{FloatScalar, RealScalar};
 
 #[repr(C)]
 #[derive(Default, Copy, Clone, PartialEq, Debug)]
@@ -19,9 +19,18 @@ impl<T> Vec2<T> {
     pub const fn new(x: T, y: T) -> Self {
         Vec2 { x, y }
     }
+
+    #[inline]
+    pub fn extend(self, z: T) -> Vec3<T> {
+        Vec3 {
+            x: self.x,
+            y: self.y,
+            z,
+        }
+    }
 }
 
-impl<T: NumScalar> Vec2<T> {
+impl<T: RealScalar> Vec2<T> {
     #[inline]
     pub fn magnitude(self) -> T {
         (self.x * self.x + self.y * self.y).sqrt()
@@ -47,15 +56,6 @@ impl<T: NumScalar> Vec2<T> {
         Vec2 {
             x: self.x * k,
             y: self.y * k,
-        }
-    }
-
-    #[inline]
-    pub fn extend(self, z: T) -> Vec3<T> {
-        Vec3 {
-            x: self.x,
-            y: self.y,
-            z,
         }
     }
 

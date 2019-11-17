@@ -304,8 +304,8 @@ impl Mat3 {
     }
 }
 
-impl_mat_ops!(Mat3, mat, 3, [f32; 3]);
-impl_mat_ops!(Mat3, Vec3, 3);
+// impl_mat_ops!(Mat3, mat, 3, [f32; 3]);
+// impl_mat_ops!(Mat3, Vec3, 3);
 
 impl Default for Mat3 {
     fn default() -> Self {

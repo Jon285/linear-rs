@@ -5,7 +5,7 @@ use std::convert::From;
 use crate::vectors::Vec2;
 use crate::vectors::Vec4;
 
-use crate::RealScalar;
+use crate::FloatScalar;
 
 #[repr(C)]
 #[derive(Debug, Clone, Copy, PartialEq, Default)]
@@ -22,7 +22,7 @@ impl<T> Vec3<T> {
     }
 }
 
-impl<T: RealScalar> Vec3<T> {
+impl<T: FloatScalar> Vec3<T> {
     #[inline]
     pub fn magnitude(self) -> T {
         (self.x.powi(2) + self.y.powi(2) + self.z.powi(2)).sqrt()
@@ -104,7 +104,7 @@ impl<T: RealScalar> Vec3<T> {
     }
 }
 
-// impl_vec_ops!(Vec3, x, y, z = 0, 1, 2);
+impl_vec_ops!(Vec3, x, y, z = 0, 1, 2);
 
 impl<T> From<[T; 3]> for Vec3<T> {
     fn from(array: [T; 3]) -> Self {

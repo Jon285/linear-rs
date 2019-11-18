@@ -3,7 +3,7 @@ use num_traits::identities;
 use std::convert::From;
 
 use crate::vectors::Vec3;
-use crate::RealScalar;
+use crate::FloatScalar;
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, PartialEq, Default)]
@@ -17,7 +17,7 @@ pub struct Vec4<T> {
 #[allow(dead_code)]
 impl<T> Vec4<T> {
     #[inline]
-    pub fn new(x: T, y: T, z: T, w: T) -> Self {
+    pub const fn new(x: T, y: T, z: T, w: T) -> Self {
         Vec4 { x, y, z, w }
     }
 
@@ -41,7 +41,7 @@ impl<T> Vec4<T> {
     }
 }
 
-impl<T: RealScalar> Vec4<T> {
+impl<T: FloatScalar> Vec4<T> {
     #[inline]
     pub fn magnitude(self) -> T {
         (self.x.powi(2) + self.y.powi(2) + self.z.powi(2) + self.w.powi(2)).sqrt()
@@ -80,7 +80,7 @@ impl<T: RealScalar> Vec4<T> {
     }
 }
 
-// impl_vec_ops!(Vec4, x, y, z, w = 0, 1, 2, 3);
+impl_vec_ops!(Vec4, x, y, z, w = 0, 1, 2, 3);
 
 impl<T> From<[T; 4]> for Vec4<T> {
     fn from(array: [T; 4]) -> Self {

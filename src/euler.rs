@@ -19,8 +19,8 @@ impl Euler {
     }
 }
 
-impl From<Mat3> for Euler {
-    fn from(mat: Mat3) -> Self {
+impl From<Mat3<f32>> for Euler {
+    fn from(mat: Mat3<f32>) -> Self {
         let mut ret = Self::default();
 
         let sp = -mat[1][2];
@@ -43,8 +43,8 @@ impl From<Mat3> for Euler {
     }
 }
 
-impl From<Mat4> for Euler {
-    fn from(mat: Mat4) -> Self {
+impl From<Mat4<f32>> for Euler {
+    fn from(mat: Mat4<f32>) -> Self {
         let mut ret = Self::default();
 
         let sp = -mat[1][2];

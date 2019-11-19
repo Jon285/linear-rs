@@ -1,7 +1,7 @@
 use num_traits::identities;
 
 use crate::vectors::Vec2;
-use crate::FloatScalar;
+use crate::{FloatScalar, RealScalar};
 
 use std::convert::From;
 use std::default::Default;
@@ -15,26 +15,24 @@ pub struct Mat2<T> {
 #[allow(dead_code)]
 impl<T> Mat2<T> {
     #[inline]
-    pub fn new(s0e0: T, s0e1: T, s1e0: T, s1e1: T) -> Self {
+    pub const fn new(s0e0: T, s0e1: T, s1e0: T, s1e1: T) -> Self {
         Mat2 {
             mat: [[s0e0, s0e1], [s1e0, s1e1]],
         }
     }
 }
 
-impl<T: FloatScalar> Mat2<T> {
-    const ZERO: T = identities::zero::<T>();
-    const ONE: T = identities::one::<T>();
+impl<T: RealScalar> Mat2<T> {
     #[inline]
     pub fn zero() -> Self {
+        let zero = identities::zero::<T>();
         Mat2 {
-            mat: [
-                [identities::zero::<T>(), identities::zero::<T>()],
-                [identities::zero::<T>(), identities::zero::<T>()],
-            ],
+            mat: [[zero, zero], [zero, zero]],
         }
     }
+}
 
+impl<T: FloatScalar> Mat2<T> {
     //====================================== TRANSFORMATION MATRICES ===============================
 
     ///Returns a rotation Matrix around the origin
@@ -48,8 +46,9 @@ impl<T: FloatScalar> Mat2<T> {
     ///Uniform scale Matrix in all directions by a factor `k`
     #[inline]
     pub fn scale(k: T) -> Self {
+        let zero = identities::zero::<T>();
         Mat2 {
-            mat: [[k, Self::ZERO], [Self::ZERO, k]],
+            mat: [[k, zero], [zero, k]],
         }
     }
 
@@ -57,17 +56,12 @@ impl<T: FloatScalar> Mat2<T> {
     #[inline]
     pub fn scale_arb(k: T, n: Vec2<T>) -> Self {
         let n = n.normalized();
+        let one = identities::one::<T>();
 
         Mat2 {
             mat: [
-                [
-                    Self::ONE + (k - Self::ONE) * n.x.powi(2),
-                    (k - Self::ONE) * n.x * n.y,
-                ],
-                [
-                    (k - Self::ONE) * n.x * n.y,
-                    Self::ONE + (k - Self::ONE) * n.y.powi(2),
-                ],
+                [one + (k - one) * n.x.powi(2), (k - one) * n.x * n.y],
+                [(k - one) * n.x * n.y, one + (k - one) * n.y.powi(2)],
             ],
         }
     }
@@ -75,16 +69,20 @@ impl<T: FloatScalar> Mat2<T> {
     ///Projection Matrix in the x-axis
     #[inline]
     pub fn projection_x() -> Self {
+        let zero = identities::zero::<T>();
+        let one = identities::one::<T>();
         Mat2 {
-            mat: [[Self::ONE, Self::ZERO], [Self::ZERO, Self::ZERO]],
+            mat: [[one, zero], [zero, zero]],
         }
     }
 
     ///Projection Matrix in the y-axis
     #[inline]
     pub fn projection_y() -> Self {
+        let zero = identities::zero::<T>();
+        let one = identities::one::<T>();
         Mat2 {
-            mat: [[Self::ZERO, Self::ZERO], [Self::ZERO, Self::ONE]],
+            mat: [[zero, zero], [zero, one]],
         }
     }
 
@@ -106,27 +104,32 @@ impl<T: FloatScalar> Mat2<T> {
     #[inline]
     pub fn reflection(n: Vec2<T>) -> Self {
         let n = n.normalized();
-        let two = Self::ONE + Self::ONE;
+        let one = identities::one::<T>();
+        let two = one + one;
 
         Mat2 {
             mat: [
-                [Self::ONE - two * n.x.powi(2), -two * n.x * n.y],
-                [-two * n.x * n.y, Self::ONE - two * n.y.powi(2)],
+                [one - two * n.x.powi(2), -two * n.x * n.y],
+                [-two * n.x * n.y, one - two * n.y.powi(2)],
             ],
         }
     }
 
     #[inline]
     pub fn shearing_x(s: T) -> Self {
+        let zero = identities::zero::<T>();
+        let one = identities::one::<T>();
         Mat2 {
-            mat: [[Self::ONE, Self::ZERO], [s, Self::ONE]],
+            mat: [[one, zero], [s, one]],
         }
     }
 
     #[inline]
     pub fn shearing_y(s: T) -> Self {
+        let zero = identities::zero::<T>();
+        let one = identities::one::<T>();
         Mat2 {
-            mat: [[Self::ONE, s], [Self::ZERO, Self::ZERO]],
+            mat: [[one, s], [zero, zero]],
         }
     }
 

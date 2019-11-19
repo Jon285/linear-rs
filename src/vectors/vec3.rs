@@ -17,8 +17,31 @@ pub struct Vec3<T> {
 
 #[allow(dead_code)]
 impl<T> Vec3<T> {
-    pub fn new(x: T, y: T, z: T) -> Self {
+    pub const fn new(x: T, y: T, z: T) -> Self {
         Vec3 { x, y, z }
+    }
+
+    #[inline]
+    pub fn extend(self, w: T) -> Vec4<T> {
+        Vec4 {
+            x: self.x,
+            y: self.y,
+            z: self.z,
+            w,
+        }
+    }
+
+    #[inline]
+    pub fn truncate(self) -> Vec2<T> {
+        Vec2 {
+            x: self.x,
+            y: self.y,
+        }
+    }
+
+    #[inline]
+    pub fn as_ptr(self) -> *const T {
+        &self.x as *const T
     }
 }
 
@@ -79,34 +102,11 @@ impl<T: FloatScalar> Vec3<T> {
             z: other.z - self.z,
         }
     }
-
-    #[inline]
-    pub fn extend(self, w: T) -> Vec4<T> {
-        Vec4 {
-            x: self.x,
-            y: self.y,
-            z: self.z,
-            w,
-        }
-    }
-
-    #[inline]
-    pub fn truncate(self) -> Vec2<T> {
-        Vec2 {
-            x: self.x,
-            y: self.y,
-        }
-    }
-
-    #[inline]
-    pub fn as_ptr(self) -> *const T {
-        &self.x as *const T
-    }
 }
 
 impl_vec_ops!(Vec3, x, y, z = 0, 1, 2);
 
-impl<T> From<[T; 3]> for Vec3<T> {
+impl<T: Copy> From<[T; 3]> for Vec3<T> {
     fn from(array: [T; 3]) -> Self {
         Vec3 {
             x: array[0],

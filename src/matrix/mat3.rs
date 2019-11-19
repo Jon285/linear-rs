@@ -7,7 +7,7 @@ use crate::euler::Euler;
 use crate::matrix::Mat2;
 use crate::quaternions::Quaternion;
 use crate::vectors::Vec3;
-use crate::FloatScalar;
+use crate::{FloatScalar, RealScalar};
 
 #[repr(C)]
 #[derive(Copy, Clone, Debug, PartialEq)]
@@ -35,10 +35,7 @@ impl<T> Mat3<T> {
     }
 }
 
-impl<T: FloatScalar> Mat3<T> {
-    const ZERO: T = identities::zero::<T>();
-    const ONE: T = identities::one::<T>();
-
+impl<T: RealScalar> Mat3<T> {
     ///Returns a null matrix
     pub fn zero() -> Self {
         let zero = identities::zero::<T>();
@@ -46,17 +43,21 @@ impl<T: FloatScalar> Mat3<T> {
             mat: [[zero, zero, zero], [zero, zero, zero], [zero, zero, zero]],
         }
     }
+}
 
+impl<T: FloatScalar> Mat3<T> {
     //================================== TRANSFORMATION MATRICES =========================================
 
     ///Returns a rotation Matrix around the x-axis
     #[inline]
     pub fn rotation_x(ang: T) -> Self {
+        let zero = identities::zero::<T>();
+        let one: T = identities::one::<T>();
         Mat3 {
             mat: [
-                [Self::ONE, Self::ZERO, Self::ZERO],
-                [Self::ZERO, ang.cos(), ang.sin()],
-                [Self::ZERO, -ang.sin(), ang.cos()],
+                [one, zero, zero],
+                [zero, ang.cos(), ang.sin()],
+                [zero, -ang.sin(), ang.cos()],
             ],
         }
     }
@@ -64,11 +65,13 @@ impl<T: FloatScalar> Mat3<T> {
     ///Returns a rotation Matrix around the y-axis
     #[inline]
     pub fn rotation_y(ang: T) -> Self {
+        let zero = identities::zero::<T>();
+        let one: T = identities::one::<T>();
         Mat3 {
             mat: [
-                [ang.cos(), Self::ZERO, -ang.sin()],
-                [Self::ZERO, Self::ONE, Self::ZERO],
-                [ang.sin(), Self::ZERO, ang.cos()],
+                [ang.cos(), zero, -ang.sin()],
+                [zero, one, zero],
+                [ang.sin(), zero, ang.cos()],
             ],
         }
     }
@@ -78,49 +81,41 @@ impl<T: FloatScalar> Mat3<T> {
     pub fn rotation_z(ang: T) -> Self {
         let cos = ang.cos();
         let sin = ang.sin();
+        let zero = identities::zero::<T>();
+        let one: T = identities::one::<T>();
 
         Mat3 {
-            mat: [
-                [cos, sin, Self::ZERO],
-                [-sin, cos, Self::ZERO],
-                [Self::ZERO, Self::ZERO, Self::ONE],
-            ],
+            mat: [[cos, sin, zero], [-sin, cos, zero], [zero, zero, one]],
         }
     }
 
     ///Returns a projection Matrix in the x- and y-axis
     #[inline]
     pub fn projection_xy() -> Self {
+        let zero = identities::zero::<T>();
+        let one: T = identities::one::<T>();
         Mat3 {
-            mat: [
-                [Self::ONE, Self::ZERO, Self::ZERO],
-                [Self::ZERO, Self::ONE, Self::ZERO],
-                [Self::ZERO, Self::ZERO, Self::ZERO],
-            ],
+            mat: [[one, zero, zero], [zero, one, zero], [zero, zero, zero]],
         }
     }
 
     ///Returns a projection Matrix in the x- and z-axis
     #[inline]
     pub fn projection_xz() -> Self {
+        let zero = identities::zero::<T>();
+        let one: T = identities::one::<T>();
         Mat3 {
-            mat: [
-                [Self::ONE, Self::ZERO, Self::ZERO],
-                [Self::ZERO, Self::ZERO, Self::ZERO],
-                [Self::ZERO, Self::ZERO, Self::ONE],
-            ],
+            mat: [[one, zero, zero], [zero, zero, zero], [zero, zero, one]],
         }
     }
 
     ///Returns a projection Matrix in the y- and z-axis
     #[inline]
     pub fn projection_yz() -> Self {
+        let zero = identities::zero::<T>();
+        let one: T = identities::one::<T>();
         Mat3 {
-            mat: [
-                [Self::ZERO, Self::ZERO, Self::ZERO],
-                [Self::ZERO, Self::ONE, Self::ZERO],
-                [Self::ZERO, Self::ZERO, Self::ONE],
-            ],
+            mat: [[zero, zero, zero], [zero, one, zero], [zero, zero, one]],
         }
     }
 
@@ -128,12 +123,13 @@ impl<T: FloatScalar> Mat3<T> {
     #[inline]
     pub fn projection(n: Vec3<T>) -> Self {
         let n = n.normalized();
+        let one: T = identities::one::<T>();
 
         Mat3 {
             mat: [
-                [Self::ONE - n.x.powi(2), -n.x * n.y, -n.x * n.z],
-                [-n.x * n.y, Self::ONE - n.y.powi(2), -n.y * n.z],
-                [-n.x * n.z, -n.y * n.z, Self::ONE - n.z.powi(2)],
+                [one - n.x.powi(2), -n.x * n.y, -n.x * n.z],
+                [-n.x * n.y, one - n.y.powi(2), -n.y * n.z],
+                [-n.x * n.z, -n.y * n.z, one - n.z.powi(2)],
             ],
         }
     }
@@ -143,7 +139,8 @@ impl<T: FloatScalar> Mat3<T> {
     pub fn rotation(ang: T, n: Vec3<T>) -> Self {
         let n = n.normalized();
 
-        let factor = Self::ONE - ang.cos();
+        let one = identities::one::<T>();
+        let factor = one - ang.cos();
         let sin = ang.sin();
         let cos = ang.cos();
 
@@ -171,12 +168,9 @@ impl<T: FloatScalar> Mat3<T> {
     ///Returns a matrix to uniformly scale a 3D vector in all directions by a factor `k`
     #[inline]
     pub fn scale(k: T) -> Self {
+        let zero = identities::zero::<T>();
         Mat3 {
-            mat: [
-                [k, Self::ZERO, Self::ZERO],
-                [Self::ZERO, k, Self::ZERO],
-                [Self::ZERO, Self::ZERO, k],
-            ],
+            mat: [[k, zero, zero], [zero, k, zero], [zero, zero, k]],
         }
     }
 
@@ -184,12 +178,13 @@ impl<T: FloatScalar> Mat3<T> {
     #[inline]
     pub fn scale_arb(k: T, n: Vec3<T>) -> Self {
         let n = n.normalized();
+        let one: T = identities::one::<T>();
 
         //pre calculating some of the members
-        let scale = Self::ONE + (k - Self::ONE);
-        let nx_ny = (k - Self::ONE) * n.x * n.y;
-        let nx_nz = (k - Self::ONE) * n.x * n.z;
-        let ny_nz = (k - Self::ONE) * n.y * n.z;
+        let scale = one + (k - one);
+        let nx_ny = (k - one) * n.x * n.y;
+        let nx_nz = (k - one) * n.x * n.z;
+        let ny_nz = (k - one) * n.y * n.z;
 
         Mat3 {
             mat: [
@@ -203,59 +198,42 @@ impl<T: FloatScalar> Mat3<T> {
     #[inline]
     pub fn reflection(n: Vec3<T>) -> Self {
         let n = n.normalized();
-        let two = Self::ONE + Self::ONE;
+        let one: T = identities::one::<T>();
+        let two = one + one;
 
         Mat3 {
             mat: [
-                [
-                    Self::ONE - two * n.x.powi(2),
-                    -two * n.x * n.y,
-                    -two * n.x * n.z,
-                ],
-                [
-                    -two * n.x * n.y,
-                    Self::ONE - two * n.y.powi(2),
-                    -two * n.x * n.z,
-                ],
-                [
-                    -two * n.x * n.z,
-                    -two * n.y * n.z,
-                    Self::ONE - two * n.z.powi(2),
-                ],
+                [one - two * n.x.powi(2), -two * n.x * n.y, -two * n.x * n.z],
+                [-two * n.x * n.y, one - two * n.y.powi(2), -two * n.x * n.z],
+                [-two * n.x * n.z, -two * n.y * n.z, one - two * n.z.powi(2)],
             ],
         }
     }
 
     #[inline]
     pub fn shearing_xy(s: T, t: T) -> Self {
+        let zero = identities::zero::<T>();
+        let one: T = identities::one::<T>();
         Mat3 {
-            mat: [
-                [Self::ONE, Self::ZERO, Self::ZERO],
-                [Self::ZERO, Self::ONE, Self::ZERO],
-                [s, t, Self::ONE],
-            ],
+            mat: [[one, zero, zero], [zero, one, zero], [s, t, one]],
         }
     }
 
     #[inline]
     pub fn shearing_xz(s: T, t: T) -> Self {
+        let zero = identities::zero::<T>();
+        let one: T = identities::one::<T>();
         Mat3 {
-            mat: [
-                [Self::ONE, Self::ZERO, Self::ZERO],
-                [s, Self::ONE, t],
-                [Self::ZERO, Self::ZERO, Self::ONE],
-            ],
+            mat: [[one, zero, zero], [s, one, t], [zero, zero, one]],
         }
     }
 
     #[inline]
     pub fn shearing_yz(s: T, t: T) -> Self {
+        let zero = identities::zero::<T>();
+        let one: T = identities::one::<T>();
         Mat3 {
-            mat: [
-                [Self::ONE, s, t],
-                [Self::ZERO, Self::ONE, Self::ZERO],
-                [Self::ZERO, Self::ZERO, Self::ONE],
-            ],
+            mat: [[one, s, t], [zero, one, zero], [zero, zero, one]],
         }
     }
 
@@ -312,18 +290,16 @@ impl<T: FloatScalar> Mat3<T> {
     }
 
     pub fn cofactor(&self, i: usize, j: usize) -> T {
-        let sign = if (i + j) % 2 == 0 {
-            Self::ONE
-        } else {
-            -Self::ONE
-        };
+        let one = identities::one::<T>();
+        let sign = if (i + j) % 2 == 0 { one } else { -one };
 
         sign * self.minor(i, j)
     }
 
     #[inline]
     pub fn determinant(&self) -> T {
-        let mut ret: T = Self::ZERO;
+        let zero = identities::zero::<T>();
+        let mut ret: T = zero;
 
         //hardcoded column value since the result is the same in any other
         for i in 0..3 {
@@ -334,12 +310,13 @@ impl<T: FloatScalar> Mat3<T> {
 
     pub fn inverse(&self) -> Option<Mat3<T>> {
         let determinant = self.determinant();
-
-        if determinant == Self::ZERO {
+        let zero = identities::zero::<T>();
+        let one = identities::one::<T>();
+        if determinant == zero {
             return None;
         }
 
-        let div = Self::ONE / determinant;
+        let div = one / determinant;
         let mut adj = Mat3::default();
 
         //create the adjoint matrix
@@ -365,14 +342,12 @@ impl<T: FloatScalar> Mat3<T> {
 impl_mat_ops!(Mat3, mat, 3, [T; 3]);
 impl_mat_ops!(Mat3, Vec3, 3);
 
-impl<T: FloatScalar> Default for Mat3<T> {
+impl<T: RealScalar> Default for Mat3<T> {
     fn default() -> Self {
+        let zero = identities::zero::<T>();
+        let one: T = identities::one::<T>();
         Mat3 {
-            mat: [
-                [Self::ONE, Self::ZERO, Self::ZERO],
-                [Self::ZERO, Self::ONE, Self::ZERO],
-                [Self::ZERO, Self::ZERO, Self::ONE],
-            ],
+            mat: [[one, zero, zero], [zero, one, zero], [zero, zero, one]],
         }
     }
 }

@@ -84,3 +84,14 @@ impl_vec_ops!(Vec2, x, y = 0, 1);
 //         }
 //     }
 // }
+
+// impl<T: FloatScalar> std::ops::Neg for Vec2<T> {
+//     type Output = Vec2<T>;
+
+//     fn neg(self) -> Self::Output {
+//         Vec2 {
+//             x: -self.x,
+//             y: -self.y,
+//         }
+//     }
+// }

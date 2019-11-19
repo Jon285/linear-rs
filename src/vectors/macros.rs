@@ -126,10 +126,10 @@ macro_rules! impl_vec_ops {
                 }
             }
 
-            impl Neg for $VecN<f32> {
-                type Output = $VecN<f32>;
+            impl<T: RealScalar> Neg for $VecN<T> {
+                type Output = $VecN<T>;
 
-                fn neg(self) -> Self {
+                fn neg(self) -> Self::Output {
                     $VecN {
                         $(
                             $field: -self.$field,

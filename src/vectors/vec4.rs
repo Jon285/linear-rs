@@ -82,7 +82,7 @@ impl<T: FloatScalar> Vec4<T> {
 
 impl_vec_ops!(Vec4, x, y, z, w = 0, 1, 2, 3);
 
-impl<T> From<[T; 4]> for Vec4<T> {
+impl<T: Copy> From<[T; 4]> for Vec4<T> {
     fn from(array: [T; 4]) -> Self {
         Vec4 {
             x: array[0],

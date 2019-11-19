@@ -35,7 +35,7 @@ impl<T: FloatScalar> Vec3<T> {
 
     #[inline]
     pub fn normalize(&mut self) {
-        let k = 1.0 / self.magnitude();
+        let k = identities::one::<T>() / self.magnitude();
         self.x *= k;
         self.y *= k;
         self.z *= k;

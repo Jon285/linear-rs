@@ -1,7 +1,7 @@
 use num_traits::identities;
 
 use crate::vectors::Vec2;
-use crate::RealScalar;
+use crate::FloatScalar;
 
 use std::convert::From;
 use std::default::Default;
@@ -22,7 +22,9 @@ impl<T> Mat2<T> {
     }
 }
 
-impl<T: RealScalar> Mat2<T> {
+impl<T: FloatScalar> Mat2<T> {
+    const ZERO: T = identities::zero::<T>();
+    const ONE: T = identities::one::<T>();
     #[inline]
     pub fn zero() -> Self {
         Mat2 {
@@ -47,7 +49,7 @@ impl<T: RealScalar> Mat2<T> {
     #[inline]
     pub fn scale(k: T) -> Self {
         Mat2 {
-            mat: [[k, 0.0], [0.0, k]],
+            mat: [[k, Self::ZERO], [Self::ZERO, k]],
         }
     }
 
@@ -58,8 +60,14 @@ impl<T: RealScalar> Mat2<T> {
 
         Mat2 {
             mat: [
-                [1.0 + (k - 1.0) * n.x.powi(2), (k - 1.0) * n.x * n.y],
-                [(k - 1.0) * n.x * n.y, 1.0 + (k - 1.0) * n.y.powi(2)],
+                [
+                    Self::ONE + (k - Self::ONE) * n.x.powi(2),
+                    (k - Self::ONE) * n.x * n.y,
+                ],
+                [
+                    (k - Self::ONE) * n.x * n.y,
+                    Self::ONE + (k - Self::ONE) * n.y.powi(2),
+                ],
             ],
         }
     }
@@ -68,7 +76,7 @@ impl<T: RealScalar> Mat2<T> {
     #[inline]
     pub fn projection_x() -> Self {
         Mat2 {
-            mat: [[1.0, 0.0], [0.0, 0.0]],
+            mat: [[Self::ONE, Self::ZERO], [Self::ZERO, Self::ZERO]],
         }
     }
 
@@ -76,7 +84,7 @@ impl<T: RealScalar> Mat2<T> {
     #[inline]
     pub fn projection_y() -> Self {
         Mat2 {
-            mat: [[0.0, 0.0], [0.0, 1.0]],
+            mat: [[Self::ZERO, Self::ZERO], [Self::ZERO, Self::ONE]],
         }
     }
 
@@ -98,11 +106,12 @@ impl<T: RealScalar> Mat2<T> {
     #[inline]
     pub fn reflection(n: Vec2<T>) -> Self {
         let n = n.normalized();
+        let two = Self::ONE + Self::ONE;
 
         Mat2 {
             mat: [
-                [1.0 - 2.0 * n.x.powi(2), -2.0 * n.x * n.y],
-                [-2.0 * n.x * n.y, 1.0 - 2.0 * n.y.powi(2)],
+                [Self::ONE - two * n.x.powi(2), -two * n.x * n.y],
+                [-two * n.x * n.y, Self::ONE - two * n.y.powi(2)],
             ],
         }
     }
@@ -110,14 +119,14 @@ impl<T: RealScalar> Mat2<T> {
     #[inline]
     pub fn shearing_x(s: T) -> Self {
         Mat2 {
-            mat: [[1.0, 0.0], [s, 1.0]],
+            mat: [[Self::ONE, Self::ZERO], [s, Self::ONE]],
         }
     }
 
     #[inline]
     pub fn shearing_y(s: T) -> Self {
         Mat2 {
-            mat: [[1.0, s], [0.0, 0.0]],
+            mat: [[Self::ONE, s], [Self::ZERO, Self::ZERO]],
         }
     }
 
@@ -153,10 +162,10 @@ impl<T: RealScalar> Mat2<T> {
     }
 }
 
-// impl_mat_ops!(Mat2, mat, 2, [T; 2]);
-// impl_mat_ops!(Mat2, Vec2, 2);
+impl_mat_ops!(Mat2, mat, 2, [T; 2]);
+impl_mat_ops!(Mat2, Vec2, 2);
 
-impl<T> Default for Mat2<T> {
+impl<T: FloatScalar> Default for Mat2<T> {
     fn default() -> Self {
         Mat2 {
             mat: [

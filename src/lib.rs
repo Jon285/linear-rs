@@ -154,7 +154,7 @@ mod tests {
     #[test]
     #[should_panic]
     fn mat3_index_fail() {
-        let mat = Mat3::default();
+        let mat: Mat3<f32> = Mat3::default();
 
         mat[5][2];
     }
@@ -203,7 +203,7 @@ mod tests {
 
     #[test]
     fn mat4_trans_cmp() {
-        let mut mat = Mat4::default();
+        let mut mat: Mat4<f32> = Mat4::default();
         let other = mat.transpost();
         mat.transpose();
 
@@ -212,7 +212,7 @@ mod tests {
 
     #[test]
     fn mat4_ident_trans() {
-        let mat = Mat4::default();
+        let mat: Mat4<f32> = Mat4::default();
 
         assert_eq!(mat, mat.transpost());
     }
@@ -236,7 +236,7 @@ mod tests {
 
     #[test]
     fn ident_inverse() {
-        let mat = Mat3::default();
+        let mat: Mat3<f32> = Mat3::default();
 
         assert_eq!(mat, mat.inverse().unwrap());
     }

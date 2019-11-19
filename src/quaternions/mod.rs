@@ -11,14 +11,14 @@ use super::Vec3;
 #[derive(Debug, Copy, Clone, Default)]
 pub struct Quaternion {
     pub w: f32,
-    pub v: Vec3,
+    pub v: Vec3<f32>,
 }
 
 #[allow(dead_code)]
 impl Quaternion {
     ///Constructs a new rotation Quaternion with a angle and a axis of rotation
     #[inline]
-    pub fn new(ang: f32, axis: Vec3) -> Self {
+    pub fn new(ang: f32, axis: Vec3<f32>) -> Self {
         let axis = axis.normalized();
         let div = ang / 2.0;
 
@@ -30,7 +30,7 @@ impl Quaternion {
 
     ///Constructs a new standard Quaternion with the passed scalar and vector
     #[inline]
-    pub fn new_sv(w: f32, v: Vec3) -> Self {
+    pub fn new_sv(w: f32, v: Vec3<f32>) -> Self {
         Quaternion { w, v }
     }
 
@@ -146,8 +146,8 @@ impl Neg for Quaternion {
 }
 
 #[allow(non_snake_case)]
-impl From<Mat3> for Quaternion {
-    fn from(mat: Mat3) -> Self {
+impl From<Mat3<f32>> for Quaternion {
+    fn from(mat: Mat3<f32>) -> Self {
         let mut ret = Quaternion::default();
 
         let W = mat[0][0] + mat[1][1] + mat[2][2];
@@ -206,8 +206,8 @@ impl From<Mat3> for Quaternion {
 }
 
 #[allow(non_snake_case)]
-impl From<Mat4> for Quaternion {
-    fn from(mat: Mat4) -> Self {
+impl From<Mat4<f32>> for Quaternion {
+    fn from(mat: Mat4<f32>) -> Self {
         let mut ret = Quaternion::default();
 
         let W = mat[0][0] + mat[1][1] + mat[2][2];

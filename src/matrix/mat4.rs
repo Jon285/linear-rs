@@ -1,3 +1,5 @@
+use num_traits::identities;
+
 use std::convert::From;
 use std::default::Default;
 
@@ -6,34 +8,35 @@ use crate::matrix::Mat3;
 use crate::quaternions::Quaternion;
 use crate::vectors::Vec3;
 use crate::vectors::Vec4;
+use crate::FloatScalar;
 
 ///A column major 4x4 matrix
 #[repr(C)]
 #[derive(Debug, PartialEq, Copy, Clone)]
-pub struct Mat4 {
-    pub(crate) mat: [[f32; 4]; 4],
+pub struct Mat4<T> {
+    pub(crate) mat: [[T; 4]; 4],
 }
 
 #[allow(dead_code)]
-impl Mat4 {
+impl<T> Mat4<T> {
     #[inline]
-    pub fn new(
-        s0e0: f32,
-        s0e1: f32,
-        s0e2: f32,
-        s0e3: f32,
-        s1e0: f32,
-        s1e1: f32,
-        s1e2: f32,
-        s1e3: f32,
-        s2e0: f32,
-        s2e1: f32,
-        s2e2: f32,
-        s2e3: f32,
-        s3e0: f32,
-        s3e1: f32,
-        s3e2: f32,
-        s3e3: f32,
+    pub const fn new(
+        s0e0: T,
+        s0e1: T,
+        s0e2: T,
+        s0e3: T,
+        s1e0: T,
+        s1e1: T,
+        s1e2: T,
+        s1e3: T,
+        s2e0: T,
+        s2e1: T,
+        s2e2: T,
+        s2e3: T,
+        s3e0: T,
+        s3e1: T,
+        s3e2: T,
+        s3e3: T,
     ) -> Self {
         Mat4 {
             mat: [
@@ -44,15 +47,20 @@ impl Mat4 {
             ],
         }
     }
+}
+
+impl<T: FloatScalar> Mat4<T> {
+    const ZERO: T = identities::zero::<T>();
+    const ONE: T = identities::one::<T>();
 
     #[inline]
     pub fn zero() -> Self {
         Mat4 {
             mat: [
-                [0.0, 0.0, 0.0, 0.0],
-                [0.0, 0.0, 0.0, 0.0],
-                [0.0, 0.0, 0.0, 0.0],
-                [0.0, 0.0, 0.0, 0.0],
+                [Self::ZERO, Self::ZERO, Self::ZERO, Self::ZERO],
+                [Self::ZERO, Self::ZERO, Self::ZERO, Self::ZERO],
+                [Self::ZERO, Self::ZERO, Self::ZERO, Self::ZERO],
+                [Self::ZERO, Self::ZERO, Self::ZERO, Self::ZERO],
             ],
         }
     }
@@ -60,52 +68,52 @@ impl Mat4 {
     //==========================================TRANSFORMATIONS=====================================
 
     #[inline]
-    pub fn rotation_x(ang: f32) -> Self {
+    pub fn rotation_x(ang: T) -> Self {
         let cos = ang.cos();
         let sin = ang.sin();
 
         Mat4 {
             mat: [
-                [1.0, 0.0, 0.0, 0.0],
-                [0.0, cos, sin, 0.0],
-                [0.0, -sin, cos, 0.0],
-                [0.0, 0.0, 0.0, 1.0],
+                [Self::ONE, Self::ZERO, Self::ZERO, Self::ZERO],
+                [Self::ZERO, cos, sin, Self::ZERO],
+                [Self::ZERO, -sin, cos, Self::ZERO],
+                [Self::ZERO, Self::ZERO, Self::ZERO, Self::ONE],
             ],
         }
     }
 
     #[inline]
-    pub fn rotation_y(ang: f32) -> Self {
+    pub fn rotation_y(ang: T) -> Self {
         let cos = ang.cos();
         let sin = ang.sin();
 
         Mat4 {
             mat: [
-                [cos, 0.0, -sin, 0.0],
-                [0.0, 1.0, 0.0, 0.0],
-                [sin, 0.0, cos, 0.0],
-                [0.0, 0.0, 0.0, 1.0],
+                [cos, Self::ZERO, -sin, Self::ZERO],
+                [Self::ZERO, Self::ONE, Self::ZERO, Self::ZERO],
+                [sin, Self::ZERO, cos, Self::ZERO],
+                [Self::ZERO, Self::ZERO, Self::ZERO, Self::ONE],
             ],
         }
     }
 
     #[inline]
-    pub fn rotation_z(ang: f32) -> Self {
+    pub fn rotation_z(ang: T) -> Self {
         let cos = ang.cos();
         let sin = ang.sin();
 
         Mat4 {
             mat: [
-                [cos, sin, 0.0, 0.0],
-                [-sin, cos, 0.0, 0.0],
-                [0.0, 0.0, 1.0, 0.0],
-                [0.0, 0.0, 0.0, 1.0],
+                [cos, sin, Self::ZERO, Self::ZERO],
+                [-sin, cos, Self::ZERO, Self::ZERO],
+                [Self::ZERO, Self::ZERO, Self::ONE, Self::ZERO],
+                [Self::ZERO, Self::ZERO, Self::ZERO, Self::ONE],
             ],
         }
     }
 
     #[inline]
-    pub fn rotation(ang: f32, n: Vec3) -> Self {
+    pub fn rotation(ang: T, n: Vec3<T>) -> Self {
         let mat3 = Mat3::rotation(ang, n);
         let mut ret = Mat4::default();
 
@@ -116,159 +124,188 @@ impl Mat4 {
     }
 
     #[inline]
-    pub fn translation(n: Vec3) -> Self {
+    pub fn translation(n: Vec3<T>) -> Self {
         Mat4 {
             mat: [
-                [1.0, 0.0, 0.0, 0.0],
-                [0.0, 1.0, 0.0, 0.0],
-                [0.0, 0.0, 1.0, 0.0],
-                [n.x, n.y, n.z, 1.0],
+                [Self::ONE, Self::ZERO, Self::ZERO, Self::ZERO],
+                [Self::ZERO, Self::ONE, Self::ZERO, Self::ZERO],
+                [Self::ZERO, Self::ZERO, Self::ONE, Self::ZERO],
+                [n.x, n.y, n.z, Self::ONE],
             ],
         }
     }
 
     #[inline]
-    pub fn scale(k: f32) -> Self {
+    pub fn scale(k: T) -> Self {
         Mat4 {
             mat: [
-                [k, 0.0, 0.0, 0.0],
-                [0.0, k, 0.0, 0.0],
-                [0.0, 0.0, k, 0.0],
-                [0.0, 0.0, 0.0, 1.0],
+                [k, Self::ZERO, Self::ZERO, Self::ZERO],
+                [Self::ZERO, k, Self::ZERO, Self::ZERO],
+                [Self::ZERO, Self::ZERO, k, Self::ZERO],
+                [Self::ZERO, Self::ZERO, Self::ZERO, Self::ONE],
             ],
         }
     }
     ///Constructs a scale Matrix towards the arbitrary direction of `n` by a factor of `k`
     #[inline]
-    pub fn scale_arb(k: f32, n: Vec3) -> Self {
+    pub fn scale_arb(k: T, n: Vec3<T>) -> Self {
         let n = n.normalized();
 
         //pre calculating some of the members
-        let scale = 1.0 + (k - 1.0);
-        let nx_ny = (k - 1.0) * n.x * n.y;
-        let nx_nz = (k - 1.0) * n.x * n.z;
-        let ny_nz = (k - 1.0) * n.y * n.z;
+        let scale = Self::ONE + (k - Self::ONE);
+        let nx_ny = (k - Self::ONE) * n.x * n.y;
+        let nx_nz = (k - Self::ONE) * n.x * n.z;
+        let ny_nz = (k - Self::ONE) * n.y * n.z;
 
         Mat4 {
             mat: [
-                [scale * n.x.powi(2), nx_ny, nx_nz, 0.0],
-                [nx_ny, scale * n.y.powi(2), ny_nz, 0.0],
-                [nx_nz, ny_nz, scale * n.z.powi(2), 0.0],
-                [0.0, 0.0, 0.0, 1.0],
+                [scale * n.x.powi(2), nx_ny, nx_nz, Self::ZERO],
+                [nx_ny, scale * n.y.powi(2), ny_nz, Self::ZERO],
+                [nx_nz, ny_nz, scale * n.z.powi(2), Self::ZERO],
+                [Self::ZERO, Self::ZERO, Self::ZERO, Self::ONE],
             ],
         }
     }
 
     #[inline]
-    pub fn reflection(n: Vec3) -> Self {
+    pub fn reflection(n: Vec3<T>) -> Self {
         let n = n.normalized();
+        let two = Self::ONE + Self::ONE;
 
         Mat4 {
             mat: [
                 [
-                    1.0 - 2.0 * n.x.powi(2),
-                    -2.0 * n.x * n.y,
-                    -2.0 * n.x * n.z,
-                    0.0,
+                    Self::ONE - two * n.x.powi(2),
+                    -two * n.x * n.y,
+                    -two * n.x * n.z,
+                    Self::ZERO,
                 ],
                 [
-                    -2.0 * n.x * n.y,
-                    1.0 - 2.0 * n.y.powi(2),
-                    -2.0 * n.x * n.z,
-                    0.0,
+                    -two * n.x * n.y,
+                    Self::ONE - two * n.y.powi(2),
+                    -two * n.x * n.z,
+                    Self::ZERO,
                 ],
                 [
-                    -2.0 * n.x * n.z,
-                    -2.0 * n.y * n.z,
-                    1.0 - 2.0 * n.z.powi(2),
-                    0.0,
+                    -two * n.x * n.z,
+                    -two * n.y * n.z,
+                    Self::ONE - two * n.z.powi(2),
+                    Self::ZERO,
                 ],
-                [0.0, 0.0, 0.0, 1.0],
+                [Self::ZERO, Self::ZERO, Self::ZERO, Self::ONE],
             ],
         }
     }
 
     #[inline]
-    pub fn shearing_xy(s: f32, t: f32) -> Self {
+    pub fn shearing_xy(s: T, t: T) -> Self {
         Mat4 {
             mat: [
-                [1.0, 0.0, 0.0, 0.0],
-                [0.0, 1.0, 0.0, 0.0],
-                [s, t, 1.0, 0.0],
-                [0.0, 0.0, 0.0, 1.0],
+                [Self::ONE, Self::ZERO, Self::ZERO, Self::ZERO],
+                [Self::ZERO, Self::ONE, Self::ZERO, Self::ZERO],
+                [s, t, Self::ONE, Self::ZERO],
+                [Self::ZERO, Self::ZERO, Self::ZERO, Self::ONE],
             ],
         }
     }
 
     #[inline]
-    pub fn shearing_xz(s: f32, t: f32) -> Self {
+    pub fn shearing_xz(s: T, t: T) -> Self {
         Mat4 {
             mat: [
-                [1.0, 0.0, 0.0, 0.0],
-                [s, 1.0, t, 0.0],
-                [0.0, 0.0, 1.0, 0.0],
-                [0.0, 0.0, 0.0, 1.0],
+                [Self::ONE, Self::ZERO, Self::ZERO, Self::ZERO],
+                [s, Self::ONE, t, Self::ZERO],
+                [Self::ZERO, Self::ZERO, Self::ONE, Self::ZERO],
+                [Self::ZERO, Self::ZERO, Self::ZERO, Self::ONE],
             ],
         }
     }
 
     #[inline]
-    pub fn shearing_yz(s: f32, t: f32) -> Self {
+    pub fn shearing_yz(s: T, t: T) -> Self {
         Mat4 {
             mat: [
-                [1.0, s, t, 0.0],
-                [0.0, 1.0, 0.0, 0.0],
-                [0.0, 0.0, 1.0, 0.0],
-                [0.0, 0.0, 0.0, 1.0],
+                [Self::ONE, s, t, Self::ZERO],
+                [Self::ZERO, Self::ONE, Self::ZERO, Self::ZERO],
+                [Self::ZERO, Self::ZERO, Self::ONE, Self::ZERO],
+                [Self::ZERO, Self::ZERO, Self::ZERO, Self::ONE],
             ],
         }
     }
 
     #[inline]
-    pub fn perspective(fov: f32, aspect: f32, near: f32, far: f32) -> Self {
-        let x_scale = 1.0 / (aspect * (fov / 2.0).tan());
-        let y_scale = 1.0 / (fov / 2.0).tan();
+    pub fn perspective(fov: T, aspect: T, near: T, far: T) -> Self {
+        let two = Self::ONE + Self::ONE;
+        let x_scale = Self::ONE / (aspect * (fov / two).tan());
+        let y_scale = Self::ONE / (fov / two).tan();
 
         Mat4 {
             mat: [
-                [x_scale, 0.0, 0.0, 0.0],
-                [0.0, y_scale, 0.0, 0.0],
-                [0.0, 0.0, (-near - far) / (near - far), 1.0],
-                [0.0, 0.0, (2.0 * far * near) / (near - far), 0.0],
+                [x_scale, Self::ZERO, Self::ZERO, Self::ZERO],
+                [Self::ZERO, y_scale, Self::ZERO, Self::ZERO],
+                [
+                    Self::ZERO,
+                    Self::ZERO,
+                    (-near - far) / (near - far),
+                    Self::ONE,
+                ],
+                [
+                    Self::ZERO,
+                    Self::ZERO,
+                    (two * far * near) / (near - far),
+                    Self::ZERO,
+                ],
             ],
         }
     }
 
     ///Contructs a perspective matrix. Equivalent to `glFrustum`
     #[inline]
-    pub fn frustum(left: f32, right: f32, bottom: f32, top: f32, near: f32, far: f32) -> Self {
+    pub fn frustum(left: T, right: T, bottom: T, top: T, near: T, far: T) -> Self {
         let vertical = (top + bottom) / (top - bottom);
         let horizontal = (right + left) / (right - left);
         let depth = -(far + near) / (far - near);
+        let two = Self::ONE + Self::ONE;
 
         Mat4 {
             mat: [
-                [(2.0 * near) / (right - 1.0), 0.0, 0.0, 0.0],
-                [0.0, (2.0 * near) / (top - bottom), 0.0, 0.0],
-                [horizontal, vertical, depth, -1.0],
-                [0.0, 0.0, (-2.0 * far * near) / (far - near), 0.0],
+                [
+                    (two * near) / (right - Self::ONE),
+                    Self::ZERO,
+                    Self::ZERO,
+                    Self::ZERO,
+                ],
+                [
+                    Self::ZERO,
+                    (two * near) / (top - bottom),
+                    Self::ZERO,
+                    Self::ZERO,
+                ],
+                [horizontal, vertical, depth, -Self::ONE],
+                [
+                    Self::ZERO,
+                    Self::ZERO,
+                    (-two * far * near) / (far - near),
+                    Self::ZERO,
+                ],
             ],
         }
     }
 
     ///Constructs an orthographic projection matrix
     #[inline]
-    pub fn ortho(left: f32, right: f32, bottom: f32, top: f32, near: f32, far: f32) -> Self {
+    pub fn ortho(left: T, right: T, bottom: T, top: T, near: T, far: T) -> Self {
         let x_trans = -((right + left) / (right - left));
         let y_trans = -((top + bottom) / (top - bottom));
         let z_trans = -((far + near) / (far - near));
+        let two = Self::ONE + Self::ONE;
 
         Mat4 {
             mat: [
-                [2.0 / (right - left), 0.0, 0.0, 0.0],
-                [0.0, 2.0 / (top - bottom), 0.0, 0.0],
-                [0.0, 0.0, -2.0 / (far - near), 0.0],
-                [x_trans, y_trans, z_trans, 1.0],
+                [two / (right - left), Self::ZERO, Self::ZERO, Self::ZERO],
+                [Self::ZERO, two / (top - bottom), Self::ZERO, Self::ZERO],
+                [Self::ZERO, Self::ZERO, -two / (far - near), Self::ZERO],
+                [x_trans, y_trans, z_trans, Self::ONE],
             ],
         }
     }
@@ -276,17 +313,17 @@ impl Mat4 {
     ///Constructs a new view matrix based on the `eye` (aka camera position),
     ///the `direction` to look and and the camera's `up` direction.
     #[inline]
-    pub fn look_at(eye: Vec3, direction: Vec3, up: Vec3) -> Self {
+    pub fn look_at(eye: Vec3<T>, direction: Vec3<T>, up: Vec3<T>) -> Self {
         let z = (eye - direction).normalized();
         let x = up.cross(z).normalized();
         let y = z.cross(x).normalized();
 
         Mat4 {
             mat: [
-                [x.x, y.x, z.x, 0.0],
-                [x.y, y.y, z.y, 0.0],
-                [x.z, y.z, z.z, 0.0],
-                [-x.dot(eye), -y.dot(eye), -z.dot(eye), 1.0],
+                [x.x, y.x, z.x, Self::ZERO],
+                [x.y, y.y, z.y, Self::ZERO],
+                [x.z, y.z, z.z, Self::ZERO],
+                [-x.dot(eye), -y.dot(eye), -z.dot(eye), Self::ONE],
             ],
         }
     }
@@ -318,7 +355,7 @@ impl Mat4 {
     }
 
     //not the best algorithm, but works fine for the purpose of this lib
-    pub fn minor(&self, i: usize, j: usize) -> f32 {
+    pub fn minor(&self, i: usize, j: usize) -> T {
         if i > 3 || j > 3 {
             panic!("out of bonds matrix access");
         }
@@ -345,12 +382,12 @@ impl Mat4 {
         matrix_3.determinant()
     }
 
-    pub fn cofactor(&self, i: usize, j: usize) -> f32 {
-        (-1 as i32).pow((i + j) as u32) as f32 * self.minor(i, j)
+    pub fn cofactor(&self, i: usize, j: usize) -> T {
+        T::from::<i32>((-1 as i32).pow((i + j) as u32)).unwrap() * self.minor(i, j)
     }
 
-    pub fn determinant(&self) -> f32 {
-        let mut ret: f32 = 0.0;
+    pub fn determinant(&self) -> T {
+        let mut ret: T = Self::ZERO;
 
         for i in 0..4 {
             ret += self[i][0] * self.cofactor(i, 0);
@@ -358,14 +395,14 @@ impl Mat4 {
         ret
     }
 
-    pub fn inverse(&self) -> Option<Mat4> {
+    pub fn inverse(&self) -> Option<Mat4<T>> {
         let determinant = self.determinant();
 
-        if determinant == 0.0 {
+        if determinant == Self::ZERO {
             return None;
         }
 
-        let div = 1.0 / determinant;
+        let div = Self::ONE / determinant;
         let mut temp = Self::default();
 
         for i in 0..4 {
@@ -378,28 +415,43 @@ impl Mat4 {
     }
 
     #[inline]
-    pub fn as_ptr(&self) -> *const f32 {
-        &self[0][0] as *const f32
+    pub fn as_ptr(&self) -> *const T {
+        &self[0][0] as *const T
     }
 
     #[inline]
-    pub fn as_mut_ptr(&mut self) -> *mut f32 {
-        &mut self[0][0] as *mut f32
+    pub fn as_mut_ptr(&mut self) -> *mut T {
+        &mut self[0][0] as *mut T
     }
 }
 
-// impl_mat_ops!(Mat4, mat, 4, [f32; 4]);
-// impl_mat_ops!(Mat4, Vec4, 4);
+impl_mat_ops!(Mat4, mat, 4, [T; 4]);
+impl_mat_ops!(Mat4, Vec4, 4);
 
-impl Default for Mat4 {
+impl<T: FloatScalar> Default for Mat4<T> {
     fn default() -> Self {
         Mat4::new(
-            1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0,
+            Self::ONE,
+            Self::ZERO,
+            Self::ZERO,
+            Self::ZERO,
+            Self::ZERO,
+            Self::ONE,
+            Self::ZERO,
+            Self::ZERO,
+            Self::ZERO,
+            Self::ZERO,
+            Self::ONE,
+            Self::ZERO,
+            Self::ZERO,
+            Self::ZERO,
+            Self::ZERO,
+            Self::ONE,
         )
     }
 }
 
-impl From<Quaternion> for Mat4 {
+impl From<Quaternion> for Mat4<f32> {
     fn from(quat: Quaternion) -> Self {
         let x = quat.v.x;
         let y = quat.v.y;
@@ -409,30 +461,30 @@ impl From<Quaternion> for Mat4 {
         Mat4 {
             mat: [
                 [
-                    1.0 - 2.0 * y.powi(2) - 2.0 * z.powi(2),
+                    Self::ONE - 2.0 * y.powi(2) - 2.0 * z.powi(2),
                     2.0 * x * y + 2.0 * w * z,
                     2.0 * x * z - 2.0 * w * y,
-                    0.0,
+                    Self::ZERO,
                 ],
                 [
                     2.0 * x * y - 2.0 * w * z,
-                    1.0 - 2.0 * x.powi(2) - 2.0 * z.powi(2),
+                    Self::ONE - 2.0 * x.powi(2) - 2.0 * z.powi(2),
                     2.0 * y * z + 2.0 * w * x,
-                    0.0,
+                    Self::ZERO,
                 ],
                 [
                     2.0 * x * z + 2.0 * w * y,
                     2.0 * y * z - 2.0 * w * x,
-                    1.0 - 2.0 * x.powi(2) - 2.0 * y.powi(2),
-                    0.0,
+                    Self::ONE - 2.0 * x.powi(2) - 2.0 * y.powi(2),
+                    Self::ZERO,
                 ],
-                [0.0, 0.0, 0.0, 1.0],
+                [Self::ZERO, Self::ZERO, Self::ZERO, Self::ONE],
             ],
         }
     }
 }
 
-impl From<Euler> for Mat4 {
+impl From<Euler> for Mat4<f32> {
     fn from(euler: Euler) -> Self {
         let cy = euler.yaw.cos();
         let cp = euler.pitch.cos();
@@ -447,29 +499,29 @@ impl From<Euler> for Mat4 {
                     cy * cr + sy * sp * sr,
                     sr * cp,
                     -sy * cr + cy * sp * sr,
-                    0.0,
+                    Self::ZERO,
                 ],
                 [
                     -cy * sr + sy * sp * cr,
                     cr * cp,
                     sr * sy + cy * sp * cr,
-                    0.0,
+                    Self::ZERO,
                 ],
-                [sy * cp, -sp, cy * cp, 0.0],
-                [0.0, 0.0, 0.0, 1.0],
+                [sy * cp, -sp, cy * cp, Self::ZERO],
+                [Self::ZERO, Self::ZERO, Self::ZERO, Self::ONE],
             ],
         }
     }
 }
 
-impl From<[[f32; 4]; 4]> for Mat4 {
-    fn from(array: [[f32; 4]; 4]) -> Self {
+impl<T> From<[[T; 4]; 4]> for Mat4<T> {
+    fn from(array: [[T; 4]; 4]) -> Self {
         Mat4 { mat: array }
     }
 }
 
-impl From<(Vec4, Vec4, Vec4, Vec4)> for Mat4 {
-    fn from(tuple: (Vec4, Vec4, Vec4, Vec4)) -> Self {
+impl<T> From<(Vec4<T>, Vec4<T>, Vec4<T>, Vec4<T>)> for Mat4<T> {
+    fn from(tuple: (Vec4<T>, Vec4<T>, Vec4<T>, Vec4<T>)) -> Self {
         Mat4 {
             mat: [
                 [tuple.0.x, tuple.0.y, tuple.0.z, tuple.0.w],

@@ -1,11 +1,12 @@
 macro_rules! impl_vec_ops {
     ($VecN:ident, $($field:ident),+ = $($dimensions:pat),+) => {
-            use std::ops::*;
+        use std::ops::*;
+        use crate::RealScalar;
 
-            impl Add<$VecN> for $VecN {
+            impl<T: RealScalar> Add<$VecN<T>> for $VecN<T> {
                 type Output = Self;
 
-                fn add(self, other: $VecN) -> Self {
+                fn add(self, other: $VecN<T>) -> Self {
                     $VecN {
                         $(
                             $field: self.$field + other.$field,
@@ -14,8 +15,8 @@ macro_rules! impl_vec_ops {
                 }
             }
 
-            impl AddAssign<$VecN> for $VecN {
-                fn add_assign(&mut self, other: $VecN) {
+            impl<T: RealScalar> AddAssign<$VecN<T>> for $VecN<T> {
+                fn add_assign(&mut self, other: $VecN<T>) {
                     *self = $VecN {
                         $(
                             $field: self.$field + other.$field,
@@ -24,10 +25,10 @@ macro_rules! impl_vec_ops {
                 }
             }
 
-            impl Sub<$VecN> for $VecN {
+            impl<T: RealScalar> Sub<$VecN<T>> for $VecN<T> {
                 type Output = Self;
 
-                fn sub(self, other: $VecN) -> Self {
+                fn sub(self, other: $VecN<T>) -> Self {
                     $VecN {
                         $(
                             $field: self.$field - other.$field,
@@ -36,8 +37,8 @@ macro_rules! impl_vec_ops {
                 }
             }
 
-            impl SubAssign<$VecN> for $VecN {
-                fn sub_assign(&mut self, other: $VecN) {
+            impl<T: RealScalar> SubAssign<$VecN<T>> for $VecN<T> {
+                fn sub_assign(&mut self, other: $VecN<T>) {
                     *self = $VecN {
                         $(
                             $field: self.$field - other.$field,
@@ -46,10 +47,10 @@ macro_rules! impl_vec_ops {
                 }
             }
 
-            impl Mul<$VecN> for $VecN {
+            impl<T: RealScalar> Mul<$VecN<T>> for $VecN<T> {
                 type Output = Self;
 
-                fn mul(self, other: $VecN) -> Self {
+                fn mul(self, other: $VecN<T>) -> Self {
                     $VecN {
                         $(
                             $field: self.$field * other.$field,
@@ -58,8 +59,8 @@ macro_rules! impl_vec_ops {
                 }
             }
 
-            impl MulAssign<$VecN> for $VecN {
-                fn mul_assign(&mut self, other: $VecN) {
+            impl<T: RealScalar> MulAssign<$VecN<T>> for $VecN<T> {
+                fn mul_assign(&mut self, other: $VecN<T>) {
                     *self = $VecN {
                         $(
                             $field: self.$field * other.$field,
@@ -68,10 +69,10 @@ macro_rules! impl_vec_ops {
                 }
             }
 
-            impl Mul<f32> for $VecN {
+            impl<T: RealScalar> Mul<T> for $VecN<T> {
                 type Output = Self;
 
-                fn mul(self, other: f32) -> Self {
+                fn mul(self, other: T) -> Self {
                     $VecN {
                         $(
                             $field: self.$field * other,
@@ -80,8 +81,8 @@ macro_rules! impl_vec_ops {
                 }
             }
 
-           impl MulAssign<f32> for $VecN {
-                fn mul_assign(&mut self, other: f32) {
+           impl<T: RealScalar> MulAssign<T> for $VecN<T> {
+                fn mul_assign(&mut self, other: T) {
                     *self = $VecN {
                         $(
                             $field: self.$field * other,
@@ -90,10 +91,10 @@ macro_rules! impl_vec_ops {
                 }
             }
 
-            impl Div<f32> for $VecN {
+            impl<T: RealScalar> Div<T> for $VecN<T> {
                 type Output = Self;
 
-                fn div(self, other: f32) -> Self {
+                fn div(self, other: T) -> Self {
                     $VecN {
                         $(
                             $field: self.$field / other,
@@ -102,8 +103,8 @@ macro_rules! impl_vec_ops {
                 }
             }
 
-            impl DivAssign<f32> for $VecN {
-                fn div_assign(&mut self, other: f32) {
+            impl<T: RealScalar> DivAssign<T> for $VecN<T> {
+                fn div_assign(&mut self, other: T) {
                     *self = $VecN {
                         $(
                             $field: self.$field / other,
@@ -112,10 +113,11 @@ macro_rules! impl_vec_ops {
                 }
             }
 
-            impl Mul<$VecN> for f32 {
-                type Output = $VecN;
+        impl Mul<$VecN<f32>> for f32
+        {
+                type Output = $VecN<f32>;
 
-                fn mul(self, other: $VecN) -> $VecN {
+                fn mul(self, other: $VecN<f32>) -> $VecN<f32> {
                     $VecN {
                         $(
                             $field: other.$field * self,
@@ -124,10 +126,10 @@ macro_rules! impl_vec_ops {
                 }
             }
 
-            impl Neg for $VecN {
-                type Output = Self;
+            impl<T: RealScalar> Neg for $VecN<T> {
+                type Output = $VecN<T>;
 
-                fn neg(self) -> Self {
+                fn neg(self) -> Self::Output {
                     $VecN {
                         $(
                             $field: -self.$field,
@@ -136,8 +138,8 @@ macro_rules! impl_vec_ops {
                 }
             }
 
-            impl Index<usize> for $VecN {
-                type Output = f32;
+            impl<T: std::fmt::Debug> Index<usize> for $VecN<T> {
+                type Output = T;
 
                 fn index(&self, index: usize) -> &Self::Output {
                     match index {
@@ -147,8 +149,8 @@ macro_rules! impl_vec_ops {
                 }
             }
 
-            impl IndexMut<usize> for $VecN {
-                fn index_mut(&mut self, index: usize) -> &mut f32 {
+            impl<T: std::fmt::Debug> IndexMut<usize> for $VecN<T> {
+                fn index_mut(&mut self, index: usize) -> &mut T {
                     match index {
                         $($dimensions => &mut self.$field,)+
                         _ => panic!("PANIC. Out of bonds access on Vector: {:?}\nWith index: {}", self, index),

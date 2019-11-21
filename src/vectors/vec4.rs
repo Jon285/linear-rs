@@ -1,41 +1,65 @@
+use num_traits::identities;
+
 use std::convert::From;
 
 use crate::vectors::Vec3;
+use crate::FloatScalar;
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, PartialEq, Default)]
-pub struct Vec4 {
-    pub x: f32,
-    pub y: f32,
-    pub z: f32,
-    pub w: f32,
+pub struct Vec4<T> {
+    pub x: T,
+    pub y: T,
+    pub z: T,
+    pub w: T,
 }
 
 #[allow(dead_code)]
-impl Vec4 {
+impl<T> Vec4<T> {
     #[inline]
-    pub fn new(x: f32, y: f32, z: f32, w: f32) -> Self {
+    pub const fn new(x: T, y: T, z: T, w: T) -> Self {
         Vec4 { x, y, z, w }
     }
 
     #[inline]
-    pub fn magnitude(self) -> f32 {
+    pub fn as_ptr(self) -> *const T {
+        &self.x as *const T
+    }
+
+    #[inline]
+    pub fn as_mut_ptr(&mut self) -> *mut T {
+        &mut self.x as *mut T
+    }
+
+    #[inline]
+    pub fn truncate(self) -> Vec3<T> {
+        Vec3 {
+            x: self.x,
+            y: self.y,
+            z: self.z,
+        }
+    }
+}
+
+impl<T: FloatScalar> Vec4<T> {
+    #[inline]
+    pub fn magnitude(self) -> T {
         (self.x.powi(2) + self.y.powi(2) + self.z.powi(2) + self.w.powi(2)).sqrt()
     }
 
     #[inline]
-    pub fn squared_mag(self) -> f32 {
+    pub fn squared_mag(self) -> T {
         self.x.powi(2) + self.y.powi(2) + self.z.powi(2) + self.w.powi(2)
     }
 
     #[inline]
-    pub fn dot(self, other: Vec4) -> f32 {
+    pub fn dot(self, other: Vec4<T>) -> T {
         self.x * other.x + self.y * other.y + self.z * other.z + self.w * other.w
     }
 
     #[inline]
     pub fn normalized(self) -> Self {
-        let s = 1.0 / self.magnitude();
+        let s = identities::one::<T>() / self.magnitude();
 
         Vec4 {
             x: self.x * s,
@@ -47,38 +71,19 @@ impl Vec4 {
 
     #[inline]
     pub fn normalize(&mut self) {
-        let s = 1.0 / self.magnitude();
+        let s = identities::one::<T>() / self.magnitude();
 
         self.x *= s;
         self.y *= s;
         self.z *= s;
         self.w *= s;
     }
-
-    #[inline]
-    pub fn truncate(self) -> Vec3 {
-        Vec3 {
-            x: self.x,
-            y: self.y,
-            z: self.z,
-        }
-    }
-
-    #[inline]
-    pub fn as_ptr(self) -> *const f32 {
-        &self.x as *const f32
-    }
-
-    #[inline]
-    pub fn as_mut_ptr(&mut self) -> *mut f32 {
-        &mut self.x as *mut f32
-    }
 }
 
 impl_vec_ops!(Vec4, x, y, z, w = 0, 1, 2, 3);
 
-impl From<[f32; 4]> for Vec4 {
-    fn from(array: [f32; 4]) -> Self {
+impl<T: Copy> From<[T; 4]> for Vec4<T> {
+    fn from(array: [T; 4]) -> Self {
         Vec4 {
             x: array[0],
             y: array[1],
@@ -88,8 +93,8 @@ impl From<[f32; 4]> for Vec4 {
     }
 }
 
-impl From<(f32, f32, f32, f32)> for Vec4 {
-    fn from(tuple: (f32, f32, f32, f32)) -> Self {
+impl<T> From<(T, T, T, T)> for Vec4<T> {
+    fn from(tuple: (T, T, T, T)) -> Self {
         Vec4 {
             x: tuple.0,
             y: tuple.1,

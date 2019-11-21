@@ -1,34 +1,49 @@
+use num_traits::identities;
+use num_traits::Num;
+
 use std::convert::From;
 
 use crate::vectors::Vec3;
+use crate::FloatScalar;
 
 #[repr(C)]
 #[derive(Default, Copy, Clone, PartialEq, Debug)]
-pub struct Vec2 {
-    pub x: f32,
-    pub y: f32,
+pub struct Vec2<T> {
+    pub x: T,
+    pub y: T,
 }
 
 #[allow(dead_code)]
-impl Vec2 {
+impl<T> Vec2<T> {
     #[inline]
-    pub fn new(x: f32, y: f32) -> Self {
+    pub const fn new(x: T, y: T) -> Self {
         Vec2 { x, y }
     }
 
     #[inline]
-    pub fn magnitude(self) -> f32 {
-        (self.x.powi(2) + self.y.powi(2)).sqrt()
+    pub fn extend(self, z: T) -> Vec3<T> {
+        Vec3 {
+            x: self.x,
+            y: self.y,
+            z,
+        }
+    }
+}
+
+impl<T: FloatScalar> Vec2<T> {
+    #[inline]
+    pub fn magnitude(self) -> T {
+        (self.x * self.x + self.y * self.y).sqrt()
     }
 
     #[inline]
-    pub fn dot(self, other: Vec2) -> f32 {
+    pub fn dot(self, other: Vec2<T>) -> T {
         (self.x * other.x + self.y * other.y).sqrt()
     }
 
     #[inline]
     pub fn normalize(&mut self) {
-        let k = 1.0 / self.magnitude();
+        let k = identities::one::<T>() / self.magnitude();
 
         self.x *= k;
         self.y += k;
@@ -36,7 +51,7 @@ impl Vec2 {
 
     #[inline]
     pub fn normalized(self) -> Self {
-        let k = 1.0 / self.magnitude();
+        let k = identities::one::<T>() / self.magnitude();
 
         Vec2 {
             x: self.x * k,
@@ -45,36 +60,38 @@ impl Vec2 {
     }
 
     #[inline]
-    pub fn extend(self, z: f32) -> Vec3 {
-        Vec3 {
-            x: self.x,
-            y: self.y,
-            z,
-        }
-    }
-
-    #[inline]
-    pub fn as_ptr(self) -> *const f32 {
-        &self.x as *const f32
+    pub fn as_ptr(self) -> *const T {
+        &self.x as *const T
     }
 }
 
 impl_vec_ops!(Vec2, x, y = 0, 1);
 
-impl From<[f32; 2]> for Vec2 {
-    fn from(array: [f32; 2]) -> Self {
-        Vec2 {
-            x: array[0],
-            y: array[1],
-        }
-    }
-}
+// impl From<[f32; 2]> for Vec2 {
+//     fn from(array: [f32; 2]) -> Self {
+//         Vec2 {
+//             x: array[0],
+//             y: array[1],
+//         }
+//     }
+// }
 
-impl From<(f32, f32)> for Vec2 {
-    fn from(tuple: (f32, f32)) -> Self {
-        Vec2 {
-            x: tuple.0,
-            y: tuple.1,
-        }
-    }
-}
+// impl From<(f32, f32)> for Vec2 {
+//     fn from(tuple: (f32, f32)) -> Self {
+//         Vec2 {
+//             x: tuple.0,
+//             y: tuple.1,
+//         }
+//     }
+// }
+
+// impl<T: FloatScalar> std::ops::Neg for Vec2<T> {
+//     type Output = Vec2<T>;
+
+//     fn neg(self) -> Self::Output {
+//         Vec2 {
+//             x: -self.x,
+//             y: -self.y,
+//         }
+//     }
+// }

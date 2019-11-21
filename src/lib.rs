@@ -1,8 +1,11 @@
 #![crate_type = "lib"]
 #![allow(unused_imports)]
 
+extern crate num_traits;
+
 mod euler;
 mod matrix;
+mod numtrait;
 mod quaternions;
 mod vectors;
 
@@ -10,6 +13,7 @@ pub use euler::Euler;
 pub use matrix::Mat2;
 pub use matrix::Mat3;
 pub use matrix::Mat4;
+pub use numtrait::{FloatScalar, RealScalar};
 pub use quaternions::Quaternion;
 pub use vectors::Vec2;
 pub use vectors::Vec3;
@@ -150,7 +154,7 @@ mod tests {
     #[test]
     #[should_panic]
     fn mat3_index_fail() {
-        let mat = Mat3::default();
+        let mat: Mat3<f32> = Mat3::default();
 
         mat[5][2];
     }
@@ -199,7 +203,7 @@ mod tests {
 
     #[test]
     fn mat4_trans_cmp() {
-        let mut mat = Mat4::default();
+        let mut mat: Mat4<f32> = Mat4::default();
         let other = mat.transpost();
         mat.transpose();
 
@@ -208,7 +212,7 @@ mod tests {
 
     #[test]
     fn mat4_ident_trans() {
-        let mat = Mat4::default();
+        let mat: Mat4<f32> = Mat4::default();
 
         assert_eq!(mat, mat.transpost());
     }
@@ -232,7 +236,7 @@ mod tests {
 
     #[test]
     fn ident_inverse() {
-        let mat = Mat3::default();
+        let mat: Mat3<f32> = Mat3::default();
 
         assert_eq!(mat, mat.inverse().unwrap());
     }

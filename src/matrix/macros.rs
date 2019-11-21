@@ -2,12 +2,13 @@
 macro_rules! impl_mat_ops {
     //basic ops
     ($MatN:ident, $field:ident, $dimension:expr, $indextype:ty) => {
+        // use crate::FloatScalar;
         use std::ops::*;
 
-        impl Add<$MatN> for $MatN {
-            type Output = Self;
+        impl<T: FloatScalar> Add<$MatN<T>> for $MatN<T> {
+            type Output = $MatN<T>;
 
-            fn add(self, other: $MatN) -> Self {
+            fn add(self, other: $MatN<T>) -> Self::Output {
                 let mut ret = $MatN::default();
 
                 for i in 0..$dimension {
@@ -19,8 +20,8 @@ macro_rules! impl_mat_ops {
             }
         }
 
-        impl AddAssign<$MatN> for $MatN {
-            fn add_assign(&mut self, other: $MatN) {
+        impl<T: FloatScalar> AddAssign<$MatN<T>> for $MatN<T> {
+            fn add_assign(&mut self, other: $MatN<T>) {
                 for i in 0..$dimension {
                     for j in 0..$dimension {
                         self.$field[i][j] += other.$field[i][j];
@@ -29,10 +30,10 @@ macro_rules! impl_mat_ops {
             }
         }
 
-        impl Sub<$MatN> for $MatN {
+        impl<T: FloatScalar> Sub<$MatN<T>> for $MatN<T> {
             type Output = Self;
 
-            fn sub(self, other: $MatN) -> Self {
+            fn sub(self, other: $MatN<T>) -> Self {
                 let mut ret = $MatN::default();
 
                 for i in 0..$dimension {
@@ -44,8 +45,8 @@ macro_rules! impl_mat_ops {
             }
         }
 
-        impl SubAssign<$MatN> for $MatN {
-            fn sub_assign(&mut self, other: $MatN) {
+        impl<T: FloatScalar> SubAssign<$MatN<T>> for $MatN<T> {
+            fn sub_assign(&mut self, other: $MatN<T>) {
                 for i in 0..$dimension {
                     for j in 0..$dimension {
                         self.$field[i][j] -= other.$field[i][j];
@@ -54,10 +55,10 @@ macro_rules! impl_mat_ops {
             }
         }
 
-        impl Mul<f32> for $MatN {
+        impl<T: FloatScalar> Mul<T> for $MatN<T> {
             type Output = Self;
 
-            fn mul(self, other: f32) -> Self {
+            fn mul(self, other: T) -> Self {
                 let mut ret = $MatN::default();
 
                 for i in 0..$dimension {
@@ -69,10 +70,10 @@ macro_rules! impl_mat_ops {
             }
         }
 
-        impl Mul<$MatN> for $MatN {
+        impl<T: FloatScalar> Mul<$MatN<T>> for $MatN<T> {
             type Output = Self;
 
-            fn mul(self, rhs: $MatN) -> Self {
+            fn mul(self, rhs: $MatN<T>) -> Self {
                 let mut ret = $MatN::zero();
 
                 for i in 0..$dimension {
@@ -86,7 +87,7 @@ macro_rules! impl_mat_ops {
             }
         }
 
-        impl Index<usize> for $MatN {
+        impl<T> Index<usize> for $MatN<T> {
             type Output = $indextype;
 
             fn index(&self, index: usize) -> &Self::Output {
@@ -94,7 +95,7 @@ macro_rules! impl_mat_ops {
             }
         }
 
-        impl IndexMut<usize> for $MatN {
+        impl<T> IndexMut<usize> for $MatN<T> {
             fn index_mut(&mut self, index: usize) -> &mut $indextype {
                 &mut self.$field[index]
             }
@@ -105,10 +106,10 @@ macro_rules! impl_mat_ops {
     ($MatN:ident, $VecN:ident, $dimension:expr) => {
         use std::ops::Mul;
 
-        impl Mul<$VecN> for $MatN {
-            type Output = $VecN;
+        impl<T: FloatScalar> Mul<$VecN<T>> for $MatN<T> {
+            type Output = $VecN<T>;
 
-            fn mul(self, other: $VecN) -> $VecN {
+            fn mul(self, other: $VecN<T>) -> $VecN<T> {
                 let mut ret = $VecN::default();
 
                 for i in 0..$dimension {

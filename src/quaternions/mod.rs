@@ -1,7 +1,11 @@
+use num_traits::cast;
+use num_traits::identities;
+
 use std::convert::From;
-use std::ops::*;
+use std::ops::{Mul, Neg};
 
 use super::Euler;
+use super::FloatScalar;
 use super::Mat3;
 use super::Mat4;
 use super::Vec3;
@@ -9,33 +13,34 @@ use super::Vec3;
 ///A purely rotation Quaternion formed by a scalar and a vector.
 #[repr(C)]
 #[derive(Debug, Copy, Clone, Default)]
-pub struct Quaternion {
-    pub w: f32,
-    pub v: Vec3<f32>,
+pub struct Quaternion<T: FloatScalar> {
+    pub w: T,
+    pub v: Vec3<T>,
 }
 
 #[allow(dead_code)]
-impl Quaternion {
+impl<T: FloatScalar> Quaternion<T> {
     ///Constructs a new rotation Quaternion with a angle and a axis of rotation
     #[inline]
-    pub fn new(ang: f32, axis: Vec3<f32>) -> Self {
+    pub fn new(ang: T, axis: Vec3<T>) -> Self {
         let axis = axis.normalized();
-        let div = ang / 2.0;
+        let one = identities::one::<T>();
+        let div = ang / (one + one);
 
         Quaternion {
             w: div.cos(),
-            v: div.sin() * axis,
+            v: (axis * div.sin()),
         }
     }
 
     ///Constructs a new standard Quaternion with the passed scalar and vector
     #[inline]
-    pub fn new_sv(w: f32, v: Vec3<f32>) -> Self {
+    pub fn new_sv(w: T, v: Vec3<T>) -> Self {
         Quaternion { w, v }
     }
 
     #[inline]
-    pub fn magnitude(self) -> f32 {
+    pub fn magnitude(self) -> T {
         (self.w.powi(2) + self.v.magnitude().powi(2)).sqrt()
     }
 
@@ -49,18 +54,18 @@ impl Quaternion {
 
     ///Returns a Quaternion that corresponds to the displacement between `self` and `other`
     #[inline]
-    pub fn displacement_from(self, other: Quaternion) -> Self {
+    pub fn displacement_from(self, other: Quaternion<T>) -> Self {
         other * self.conjugate()
     }
 
     #[inline]
-    pub fn dot(self, other: Quaternion) -> f32 {
+    pub fn dot(self, other: Quaternion<T>) -> T {
         self.w * other.w + self.v.dot(other.v)
     }
 
     ///Raises self to the power of `exp`
-    pub fn pow(self, exp: f32) -> Self {
-        if self.w.abs() > 0.99999 {
+    pub fn pow(self, exp: T) -> Self {
+        if self.w.abs() > cast::cast::<f64, T>(0.99999).unwrap() {
             return self;
         }
 
@@ -76,27 +81,29 @@ impl Quaternion {
     }
 
     ///Calculates the spherical interpolation between `self` and `other` by the amount of `t`
-    pub fn slerp(self, other: Quaternion, t: f32) -> Self {
+    pub fn slerp(self, other: Quaternion<T>, t: T) -> Self {
         let mut omega_cos = self.dot(other);
-        let w2: Quaternion;
+        let w2: Quaternion<T>;
+        let zero = identities::zero::<T>();
+        let one = identities::one::<T>();
 
-        if omega_cos < 0.0 {
+        if omega_cos < zero {
             w2 = -other;
             omega_cos = -omega_cos;
         } else {
             w2 = other;
         }
 
-        let (k0, k1) = if omega_cos > 0.9999 {
-            (1.0 - t, t)
+        let (k0, k1) = if omega_cos > cast::cast::<f64, T>(0.9999).unwrap() {
+            (one - t, t)
         } else {
-            let omega_sin = (1.0 - omega_cos * omega_cos).sqrt();
+            let omega_sin = (one - omega_cos * omega_cos).sqrt();
             let omega = omega_sin.atan2(omega_cos);
 
-            let inverse = 1.0 / omega_sin;
+            let inverse = one / omega_sin;
 
             (
-                ((1.0 - t) * omega).sin() * inverse,
+                ((one - t) * omega).sin() * inverse,
                 (t * omega).sin() * inverse,
             )
         };
@@ -112,21 +119,21 @@ impl Quaternion {
     }
 }
 
-impl Mul<Quaternion> for Quaternion {
+impl<T: FloatScalar> Mul<Quaternion<T>> for Quaternion<T> {
     type Output = Self;
 
-    fn mul(self, other: Quaternion) -> Self::Output {
+    fn mul(self, other: Quaternion<T>) -> Self::Output {
         Quaternion {
             w: self.w * other.w - self.v.dot(other.v),
-            v: self.w * other.v + other.w * self.v + self.v.cross(other.v),
+            v: other.v * self.w + self.v + self.v.cross(other.v) * other.w,
         }
     }
 }
 
-impl Mul<f32> for Quaternion {
+impl<T: FloatScalar> Mul<T> for Quaternion<T> {
     type Output = Self;
 
-    fn mul(self, other: f32) -> Self::Output {
+    fn mul(self, other: T) -> Self::Output {
         Quaternion {
             w: self.w * other,
             v: self.v * other,
@@ -134,7 +141,7 @@ impl Mul<f32> for Quaternion {
     }
 }
 
-impl Neg for Quaternion {
+impl<T: FloatScalar> Neg for Quaternion<T> {
     type Output = Self;
 
     fn neg(self) -> Self::Output {
@@ -146,8 +153,8 @@ impl Neg for Quaternion {
 }
 
 #[allow(non_snake_case)]
-impl From<Mat3<f32>> for Quaternion {
-    fn from(mat: Mat3<f32>) -> Self {
+impl<T: FloatScalar> From<Mat3<T>> for Quaternion<T> {
+    fn from(mat: Mat3<T>) -> Self {
         let mut ret = Quaternion::default();
 
         let W = mat[0][0] + mat[1][1] + mat[2][2];
@@ -173,8 +180,9 @@ impl From<Mat3<f32>> for Quaternion {
             index = 3;
         }
 
-        let largest = (biggest + 1.0).sqrt() * 0.5;
-        let mult = 0.25 / largest;
+        let largest =
+            (biggest + identities::one::<T>()).sqrt() * cast::cast::<f64, T>(0.5).unwrap();
+        let mult = cast::cast::<f64, T>(0.25).unwrap() / largest;
 
         match index {
             0 => {
@@ -206,8 +214,8 @@ impl From<Mat3<f32>> for Quaternion {
 }
 
 #[allow(non_snake_case)]
-impl From<Mat4<f32>> for Quaternion {
-    fn from(mat: Mat4<f32>) -> Self {
+impl<T: FloatScalar> From<Mat4<T>> for Quaternion<T> {
+    fn from(mat: Mat4<T>) -> Self {
         let mut ret = Quaternion::default();
 
         let W = mat[0][0] + mat[1][1] + mat[2][2];
@@ -233,8 +241,9 @@ impl From<Mat4<f32>> for Quaternion {
             index = 3;
         }
 
-        let largest = (biggest + 1.0).sqrt() * 0.5;
-        let mult = 0.25 / largest;
+        let largest =
+            (biggest + identities::one::<T>()).sqrt() * cast::cast::<f64, T>(0.5).unwrap();
+        let mult = cast::cast::<f64, T>(0.25).unwrap() / largest;
 
         match index {
             0 => {
@@ -272,11 +281,13 @@ impl From<Mat4<f32>> for Quaternion {
     }
 }
 
-impl From<Euler> for Quaternion {
-    fn from(euler: Euler) -> Self {
-        let yaw = euler.yaw / 2.0;
-        let pitch = euler.pitch / 2.0;
-        let row = euler.row / 2.0;
+impl<T: FloatScalar> From<Euler<T>> for Quaternion<T> {
+    fn from(euler: Euler<T>) -> Self {
+        let two = identities::one::<T>() + identities::one::<T>();
+
+        let yaw = euler.yaw / two;
+        let pitch = euler.pitch / two;
+        let row = euler.row / two;
 
         let w = yaw.cos() * pitch.cos() * row.cos() + yaw.sin() * pitch.sin() * row.sin();
         let x = yaw.cos() * pitch.sin() * row.cos() + yaw.sin() * pitch.cos() * row.sin();

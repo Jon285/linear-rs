@@ -444,47 +444,52 @@ impl<T: RealScalar> Default for Mat4<T> {
     }
 }
 
-impl From<Quaternion> for Mat4<f32> {
-    fn from(quat: Quaternion) -> Self {
+impl<T: FloatScalar> From<Quaternion<T>> for Mat4<T> {
+    fn from(quat: Quaternion<T>) -> Self {
         let x = quat.v.x;
         let y = quat.v.y;
         let z = quat.v.z;
         let w = quat.w;
+        let zero = identities::zero::<T>();
+        let one = identities::one::<T>();
+        let two = one + one;
 
         Mat4 {
             mat: [
                 [
-                    1.0 - 2.0 * y.powi(2) - 2.0 * z.powi(2),
-                    2.0 * x * y + 2.0 * w * z,
-                    2.0 * x * z - 2.0 * w * y,
-                    0.0,
+                    one - two * y.powi(2) - two * z.powi(2),
+                    two * x * y + two * w * z,
+                    two * x * z - two * w * y,
+                    zero,
                 ],
                 [
-                    2.0 * x * y - 2.0 * w * z,
-                    1.0 - 2.0 * x.powi(2) - 2.0 * z.powi(2),
-                    2.0 * y * z + 2.0 * w * x,
-                    0.0,
+                    two * x * y - two * w * z,
+                    one - two * x.powi(2) - two * z.powi(2),
+                    two * y * z + two * w * x,
+                    zero,
                 ],
                 [
-                    2.0 * x * z + 2.0 * w * y,
-                    2.0 * y * z - 2.0 * w * x,
-                    1.0 - 2.0 * x.powi(2) - 2.0 * y.powi(2),
-                    0.0,
+                    two * x * z + two * w * y,
+                    two * y * z - two * w * x,
+                    one - two * x.powi(2) - two * y.powi(2),
+                    zero,
                 ],
-                [0.0, 0.0, 0.0, 1.0],
+                [zero, zero, zero, one],
             ],
         }
     }
 }
 
-impl From<Euler> for Mat4<f32> {
-    fn from(euler: Euler) -> Self {
+impl<T: FloatScalar> From<Euler<T>> for Mat4<T> {
+    fn from(euler: Euler<T>) -> Self {
         let cy = euler.yaw.cos();
         let cp = euler.pitch.cos();
         let cr = euler.row.cos();
         let sy = euler.yaw.cos();
         let sp = euler.pitch.cos();
         let sr = euler.row.sin();
+        let zero = identities::zero::<T>();
+        let one = identities::one::<T>();
 
         Mat4 {
             mat: [
@@ -492,16 +497,16 @@ impl From<Euler> for Mat4<f32> {
                     cy * cr + sy * sp * sr,
                     sr * cp,
                     -sy * cr + cy * sp * sr,
-                    0.0,
+                    zero,
                 ],
                 [
                     -cy * sr + sy * sp * cr,
                     cr * cp,
                     sr * sy + cy * sp * cr,
-                    0.0,
+                    zero,
                 ],
-                [sy * cp, -sp, cy * cp, 0.0],
-                [0.0, 0.0, 0.0, 1.0],
+                [sy * cp, -sp, cy * cp, zero],
+                [zero, zero, zero, one],
             ],
         }
     }

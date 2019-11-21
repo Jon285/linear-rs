@@ -351,37 +351,39 @@ impl<T: RealScalar> Default for Mat3<T> {
         }
     }
 }
-impl From<Quaternion> for Mat3<f32> {
-    fn from(quat: Quaternion) -> Self {
+impl<T: FloatScalar> From<Quaternion<T>> for Mat3<T> {
+    fn from(quat: Quaternion<T>) -> Self {
         let x = quat.v.x;
         let y = quat.v.y;
         let z = quat.v.z;
         let w = quat.w;
+        let one = identities::one::<T>();
+        let two = one + one;
 
         Mat3 {
             mat: [
                 [
-                    1.0 - 2.0 * y.powi(2) - 2.0 * z.powi(2),
-                    2.0 * x * y + 2.0 * w * z,
-                    2.0 * x * z - 2.0 * w * y,
+                    one - two * y.powi(2) - two * z.powi(2),
+                    two * x * y + two * w * z,
+                    two * x * z - two * w * y,
                 ],
                 [
-                    2.0 * x * y - 2.0 * w * z,
-                    1.0 - 2.0 * x.powi(2) - 2.0 * z.powi(2),
-                    2.0 * y * z + 2.0 * w * x,
+                    two * x * y - two * w * z,
+                    one - two * x.powi(2) - two * z.powi(2),
+                    two * y * z + two * w * x,
                 ],
                 [
-                    2.0 * x * z + 2.0 * w * y,
-                    2.0 * y * z - 2.0 * w * x,
-                    1.0 - 2.0 * x.powi(2) - 2.0 * y.powi(2),
+                    two * x * z + two * w * y,
+                    two * y * z - two * w * x,
+                    one - two * x.powi(2) - two * y.powi(2),
                 ],
             ],
         }
     }
 }
 
-impl From<Euler> for Mat3<f32> {
-    fn from(euler: Euler) -> Self {
+impl<T: FloatScalar> From<Euler<T>> for Mat3<T> {
+    fn from(euler: Euler<T>) -> Self {
         let cy = euler.yaw.cos();
         let cp = euler.pitch.cos();
         let cr = euler.row.cos();
